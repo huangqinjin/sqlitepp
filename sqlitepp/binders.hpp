@@ -30,17 +30,16 @@ public:
 
 	// Update bound value.
 	void update(statement& st);
+
 private:
-	// Noncopyable.
-	into_binder(into_binder const&);
-	// Nonassignable.
-	into_binder& operator=(into_binder const&);
+	into_binder(into_binder const&); // = delete;
+	into_binder& operator=(into_binder const&); // = delete;
 
 	virtual void do_bind(statement& st, int pos) = 0;
 	virtual void do_update(statement& st) = 0;
 };
 
-typedef std::auto_ptr<into_binder> into_binder_ptr;
+typedef std::unique_ptr<into_binder> into_binder_ptr;
 
 /// use binder interface
 class use_binder
@@ -51,16 +50,15 @@ public:
 
 	/// Bind value to statement st in position pos
 	int bind(statement& st, int pos);
+
 private:
-	// Noncopyable.
-	use_binder(use_binder const&);
-	// Nonassignable.
-	use_binder& operator=(use_binder const&);
+	use_binder(use_binder const&); // = delete;
+	use_binder& operator=(use_binder const&); // = delete;
 
 	virtual void do_bind(statement& st, int pos) = 0;
 };
 
-typedef std::auto_ptr<use_binder> use_binder_ptr;
+typedef std::unique_ptr<use_binder> use_binder_ptr;
 
 //////////////////////////////////////////////////////////////////////////////
 
