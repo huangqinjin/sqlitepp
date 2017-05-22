@@ -9,7 +9,7 @@
 #include <numeric>
 #include <type_traits>
 
-#include "../sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 #include "statement.hpp"
 #include "exception.hpp"

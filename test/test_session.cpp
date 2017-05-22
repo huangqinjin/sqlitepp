@@ -4,7 +4,7 @@
 #include "session_data.hpp"
 #include <sqlitepp/exception.hpp>
 
-#include "../sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 using namespace sqlitepp;
 
