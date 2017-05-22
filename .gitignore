@@ -1,6 +1,9 @@
 
-/bin
-/lib
+/bin/
+/include/
+/lib/
+build/
+cmake-build-*/
 
 *.sdf
 *.opensdf
