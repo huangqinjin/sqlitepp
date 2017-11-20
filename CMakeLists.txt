@@ -1,22 +1,18 @@
 cmake_minimum_required(VERSION 3.1)
 
-option(BUILD_SQLITE3 "build sqlite3 shipped with sqlitepp" ON)
+option(BUILD_SQLITE3 "build sqlite3 shipped with sqlitepp" OFF)
+
+if (NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE Release CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+    FORCE)
+endif()
 
 if(BUILD_SQLITE3)
-    add_subdirectory(sqlite)
+    add_subdirectory(sqlite3)
 else()
-    find_path(SQLITE3_INCLUDE_DIR NAMES sqlite3.h)
-    find_library(SQLITE3_LIBRARY NAMES sqlite3)
-    if(SQLITE3_INCLUDE_DIR AND SQLITE3_LIBRARY)
-        message(STATUS "Found installed sqlite3: ${SQLITE3_INCLUDE_DIR}, ${SQLITE3_LIBRARY}")
-        add_library(sqlitepp::sqlite3 UNKNOWN IMPORTED)
-        set_target_properties(sqlitepp::sqlite3 PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES "${SQLITE3_INCLUDE_DIR}"
-                INTERFACE_LINK_LIBRARIES "${CMAKE_DL_LIBS}"
-                IMPORTED_LOCATION "${SQLITE3_LIBRARY}")
-    else()
-        message(FATAL_ERROR "Can't found sqlite3")
-    endif()
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/sqlitepp)
+    find_package(SQLite3 MODULE REQUIRED)
 endif()
 
 add_subdirectory(sqlitepp)
