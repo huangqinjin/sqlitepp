@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(sqlitepp VERSION 3.21.0)
+project(sqlitepp VERSION 3.22.0)
 
 file(GLOB HEADER_FILES *.hpp)
 file(GLOB SOURCE_FILES *.cpp)
