@@ -9,7 +9,8 @@ add_library(sqlitepp::sqlitepp ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/..>)
 target_link_libraries(sqlitepp PRIVATE sqlitepp::sqlite3)
 set_target_properties(sqlitepp PROPERTIES PUBLIC_HEADER "${HEADER_FILES}"
-                      CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENTIONS OFF)
+                      CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENTIONS OFF
+                      WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 
 include(GNUInstallDirs)
