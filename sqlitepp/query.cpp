@@ -146,13 +146,14 @@ once_query::~once_query()
 {
 	if ( s_ )
 	{
-		if ( s_->is_open() )
+		if ( !s_->is_open() )
 		{
-			// execute statement in session.
-			statement st(*s_);
-			st.q() = std::move(*this);
-			st.exec();
+			throw session_not_open();
 		}
+		// execute statement in session.
+		statement st(*s_);
+		st.q() = std::move(*this);
+		st.exec();
 	}
 }
 //----------------------------------------------------------------------------
