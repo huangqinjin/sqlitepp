@@ -26,17 +26,25 @@ class session
 {
 	friend class transaction; // access to active_txn_
 	friend class statement;   // access to last_exec_
+
 public:
+    enum : unsigned
+    {
+        read = 1,
+        write = 2,
+        create = 4,
+    };
+
 	// Create a session.
-	session();
+	session() noexcept;
 	
 	// Create and open session.
 	// Optional parameter flags for file open operations
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	explicit session(string_t const& file_name, int flags = 0);
+	explicit session(string_t const& file_name, unsigned flags = read | write | create);
 
-	session(session&& src);
-	session& operator=(session&& src);
+    session(session const&) = delete;
+    session& operator=(session const&) = delete;
 
 	// Close session on destroy.
 	~session();
@@ -44,49 +52,45 @@ public:
 	// Open database session. Previous one will be closed.
 	// Optional parameter flags for file open operations
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	void open(string_t const& file_name, int flags = 0);
+	void open(string_t const& file_name, unsigned flags = read | write | create);
 	
 	// Close database session.
-	void close();
+	void close(bool force = false);
 
 	// Is session opened?
-	bool is_open() const // throw()
-	{
-		return impl_ != nullptr;
-	}
+	bool is_open() const noexcept;
 
 	// Is there an active transaction?
 	// Currently SQLite 3 doesn't support nested transactions.
 	// So we can test, is there any transaction in session.
 	// If we have the transaction, we get it or null otherwise.
-	transaction* active_txn() const // throw()
-	{
-		return active_txn_;
-	}
+	transaction* active_txn() const noexcept;
+
+    // Last statement::exec result
+    bool last_exec() const noexcept;
 
 	/// SQLite implementation for native sqlite3 functions.
-	sqlite3* impl() const { return impl_; }
+	sqlite3* impl() const noexcept;
 
-	/// Check error code. If code is not ok, throws exception.
-	void check_error(int code) const;
-	void check_last_error() const { check_error(last_error()); }
+    /// Check the most recent sqlite3_* API call's error code. If code is not ok, throws exception.
+    void check_error(int code) const;
+
+    /// If last error is not ok, throws exception, equivalent to check_error(last_error).
+    void check_last_error() const;
 
 	// Last session error
-	int last_error() const;
-
-	// Last statement::exec result
-	bool last_exec() const { return last_exec_; }
+	int last_error() const noexcept;
 
 	// Last insert row ID
-	long long last_insert_rowid() const;
+	long long last_insert_rowid() const noexcept;
 	
 	// The number of rows that were changed (or inserted or deleted)
 	// by the most recent SQL statement
-	size_t last_changes() const;
+	size_t last_changes() const noexcept;
 
 	// The number of rows that were changed (or inserted or deleted)
 	// since the database was opened
-	size_t total_changes() const;
+	size_t total_changes() const noexcept;
 
 	// Execute SQL query immediately.
 	// It might be useful for resultless statements like INSERT, UPDATE etc.
@@ -99,16 +103,7 @@ public:
 		return q;
 	}
 
-	// Swap session instances
-	friend void swap(session& lhs, session& rhs)
-	{
-		std::swap(lhs.impl_, rhs.impl_);
-		std::swap(lhs.active_txn_, rhs.active_txn_);
-	}
 private:
-	session(session const&); // = delete;
-	session& operator=(session const&); // = delete;
-
 	sqlite3* impl_;
 	transaction* active_txn_;
 	bool last_exec_;
