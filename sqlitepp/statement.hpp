@@ -29,13 +29,14 @@ class statement
 {
 public:
 	// Create an empty statement
-	explicit statement(session& s);
+	explicit statement(session& s) noexcept;
 	
 	// Create statement with SQL query text.
 	statement(session& s, string_t const& sql);
 
-	statement(statement&& src);
-	statement& operator=(statement&& src);
+    statement(statement&& src) noexcept;
+    statement(statement const&) = delete;
+    statement& operator=(statement const&) = delete;
 
 	// Finalize statement on destroy.
 	~statement();
@@ -50,13 +51,10 @@ public:
 	void finalize(bool check_error = true);
 
 	// Is statement prepared.
-	bool is_prepared() const // throw()
-	{
-		return impl_ != nullptr;
-	}
+	bool is_prepared() const noexcept;
 
 	/// SQLite statement implementation for sqlite3 functions
-	sqlite3_stmt* impl() const { return impl_; }
+	sqlite3_stmt* impl() const noexcept;
 
 	// Reset statement. Return to prepared state. Optionally rebind values
 	void reset(bool rebind = false);
@@ -71,16 +69,10 @@ public:
 	}
 
 	// Statement query.
-	query const& q() const // throw()
-	{
-		return q_;
-	}
+	query const& q() const noexcept;
 
 	// Statement query.
-	query& q() // throw()
-	{
-		return q_;
-	}
+	query& q() noexcept;
 
 	// Number of columns in result set of prepared statement.
 	int column_count() const;
@@ -89,9 +81,9 @@ public:
 	// Column index in result set.
 	int column_index(string_t const& name) const;
 	// Colmn type of result set in prepared statement.
-	enum col_type { COL_INT = 1, COL_FLOAT = 2, COL_TEXT = 3, COL_BLOB = 4, COL_NULL = 5 };
+	enum type { integer = 1, real = 2, text = 3, blob = 4, null = 5 };
 	// Column type in result set.
-	col_type column_type(int column) const;
+	type column_type(int column) const;
 
 	// Column value as int.
 	void column_value(int column, int& value) const;
@@ -102,7 +94,7 @@ public:
 	// Column value as string.
 	void column_value(int column, string_t& value) const;
 	// Column value as BLOB.
-	void column_value(int column, blob& value) const;
+	void column_value(int column, struct blob& value) const;
 
 	// Get column value as type T.
 	template<typename T>
@@ -113,6 +105,13 @@ public:
 		return converter<T>::to(t);
 	}
 
+    // Get use position by name in query.
+    int use_pos(string_t const& name) const;
+    // Get use parameter count in query.
+    int use_count() const;
+
+    // Use null value in query.
+    void use_value(int pos, std::nullptr_t);
 	// Use int value in query.
 	void use_value(int pos, int value);
 	// Use 64-bit int value in query.
@@ -120,20 +119,15 @@ public:
 	// Use double value in query.
 	void use_value(int pos, double value);
 	// Use UTF-8 character string in query.
-	void use_value(int pos, utf8_char const* value);
+	void use_value(int pos, utf8_char const* value, bool copy = false);
 	// Use UTF-16 character string in query.
-	void use_value(int pos, utf16_char const* value);
+	void use_value(int pos, utf16_char const* value, bool copy = false);
 	// Use string value in query.
-	void use_value(int pos, string_t const& value, bool make_copy = true);
+	void use_value(int pos, string_t const& value, bool copy = false);
 	// Use BLOB value in query.
-	void use_value(int pos, blob const& value, bool make_copy = true);
+	void use_value(int pos, struct blob const& value, bool copy = false);
 
-	// Get use position by name in query.
-	int use_pos(string_t const& name) const;
 private:
-	statement(statement const&); // = delete;
-	statement& operator=(statement const&); // = delete;
-
 	session& s_;
 	query q_;
 	sqlite3_stmt* impl_;
