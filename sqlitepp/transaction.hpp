@@ -26,10 +26,10 @@ public:
 	// Begin transaction in context of session.
 	explicit transaction(session& s, type t = deferred);
 
-	transaction(transaction&& src);
-	transaction& operator=(transaction&& src);
+    transaction(transaction const&) = delete;
+    transaction& operator=(transaction const&) = delete;
 
-	// End transaction with rollback if it is not commited.
+	// End transaction with rollback if it is not committed.
 	~transaction();
 
 	// Rollback transaction
@@ -39,11 +39,7 @@ public:
 	void commit();
 
 private:
-	transaction(transaction const&); // = delete
-	transaction& operator=(transaction const&); // = delete
-
 	session* s_;
-	bool do_rollback_;
 };
 
 //////////////////////////////////////////////////////////////////////////////

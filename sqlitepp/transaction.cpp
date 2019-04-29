@@ -19,7 +19,6 @@ namespace sqlitepp {
 
 transaction::transaction(session& s, type t)
 	: s_(&s)
-	, do_rollback_(false)
 {
 	if ( s_->active_txn() )
 	{
@@ -39,41 +38,13 @@ transaction::transaction(session& s, type t)
 		begin_cmd = "begin exclusive";
 		break;
 	default:
-		assert(false && "unknown transaction type");
+		assert(!"unknown transaction type");
 		begin_cmd = "begin";
 		break;
 	}
 
 	*s_ << utf(begin_cmd);
 	s_->active_txn_ = this;
-	do_rollback_ = true;
-}
-//----------------------------------------------------------------------------
-
-transaction::transaction(transaction&& src)
-	: s_(src.s_)
-	, do_rollback_(src.do_rollback_)
-{
-	*this = std::move(src);
-}
-//----------------------------------------------------------------------------
-
-transaction& transaction::operator=(transaction&& src)
-{
-	if ( &src != this )
-	{
-		s_ = src.s_;
-		src.s_ = nullptr;
-
-		do_rollback_ = src.do_rollback_;
-		src.do_rollback_ = false;
-
-		if ( s_ )
-		{
-			s_->active_txn_ = this;
-		}
-	}
-	return *this;
 }
 //----------------------------------------------------------------------------
 
@@ -92,15 +63,12 @@ transaction::~transaction()
 
 void transaction::rollback()
 {
-	if ( do_rollback_ && s_ )
-	{
-		*s_ << utf("rollback");
-	}
 	if ( s_ )
 	{
-		s_->active_txn_ = nullptr;
+		*s_ << utf("rollback");
+        s_->active_txn_ = nullptr;
+        s_ = nullptr;
 	}
-	do_rollback_ = false;
 }
 //----------------------------------------------------------------------------
 
@@ -109,8 +77,9 @@ void transaction::commit()
 	if ( s_ )
 	{
 		*s_ << utf("commit");
+        s_->active_txn_ = nullptr;
+		s_ = nullptr;
 	}
-	do_rollback_ = false;
 }
 //----------------------------------------------------------------------------
 
