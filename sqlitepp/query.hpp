@@ -28,32 +28,26 @@ class statement;
 class query
 {
 	friend class statement; // access to intos_ and uses_
+
 public:
 	// Create an empty query.
-	query() {}
-	// Create a query with SQL text.
-	explicit query(string_t const& sql) { sql_ << sql; }
+	query();
+	query(query&& src) noexcept;
+	query& operator=(query&& src) noexcept;
 
-	query(query&& src);
-	query& operator=(query&& src);
+    query(query const&) = delete;
+    query& operator=(query const&) = delete;
 
 	// Clear query on destroy.
-	~query() { clear(); }
+	~query();
 
-	// Current SQL statement.
-	string_t sql() const // throw()
-	{
-		return sql_.str();
-	}
-	
-	// Set new SQL statement.
-	void sql(string_t const& text);
+	void swap(query& other) noexcept;
+
+    // Current SQL statement.
+    string_t sql() const;
 
 	// Clear sql text, into and use bindings.
-	void clear(); // throw()
-	
-	// Is query empty?
-	bool empty() const; // throw()
+	void clear() noexcept;
 
 	// Collect SQL text.
 	template<typename T>
@@ -65,26 +59,13 @@ public:
 
 	// Add into binder.
 	query& put(into_binder_ptr i);
-
-	// Add into binder.
-	query& operator,(into_binder_ptr i)
-	{
-		return put(std::move(i));
-	}
+	query& operator,(into_binder_ptr i);
 	
 	// Add use binder.
 	query& put(use_binder_ptr i);
-	
-	// Add use binder.
-	query& operator,(use_binder_ptr u)
-	{
-		return put(std::move(u));
-	}
+	query& operator,(use_binder_ptr u);
 
 private:
-	query(query const& src); // = delete
-	query& operator=(query const& src); // = delete
-
 	std::vector<into_binder_ptr> intos_;
 	std::vector<use_binder_ptr> uses_;
 
@@ -95,40 +76,41 @@ private:
 class prepare_query : public query
 {
 	friend class statement; // access to ctor
+
 public:
 	// Transfer execution responsibility from src to this object.
-	prepare_query(prepare_query&& src);
+	prepare_query(prepare_query&& src) noexcept;
+
+    prepare_query(prepare_query const&) = delete;
+    prepare_query& operator=(prepare_query const&) = delete;
 
 	// Move query to statement on destroy.
 	~prepare_query();
 
 private:
 	// Create preparing proxy for statement.
-	prepare_query(statement& st);
-
-	prepare_query(prepare_query const& src); // = delete
-	prepare_query& operator=(prepare_query const& src); // = delete
+	explicit prepare_query(statement& st) noexcept;
 
 	statement* st_;
 };
 
-// Immediatly executed query proxy.
+// Immediately executed query proxy, the result can be queried using session.last_exec().
 class once_query : public query
 {
 	friend class session; // access to ctor
 public:
-	// Transfer execution responsibiblty from src to this object.
-	once_query(once_query&& src);
+	// Transfer execution responsibility from src to this object.
+	once_query(once_query&& src) noexcept;
+
+    once_query(once_query const&) = delete;
+    once_query& operator=(once_query const&) = delete;
 
 	// Execute statement on destroy.
-	~once_query();
+	~once_query() noexcept(false);
 
 private:
 	// Create proxy for session.
-	once_query(session& s);
-
-	once_query(once_query const& src); // = delete;
-	once_query& operator=(once_query const& src); // = delete;
+	explicit once_query(session& s) noexcept;
 
 	session* s_;
 };

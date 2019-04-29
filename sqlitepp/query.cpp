@@ -15,63 +15,48 @@
 namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
-
-namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-inline void delete_object(T* obj)
-{
-	delete obj;
-}
-//----------------------------------------------------------------------------
-
-//////////////////////////////////////////////////////////////////////////////
-
-} // namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
 //
 // query
 //
 
-query::query(query&& src)
+query::query() = default;
+
+query::query(query&& src) noexcept
 {
-	*this = std::move(src);
+	swap(src);
 }
 
-query& query::operator=(query&& src)
+query& query::operator=(query&& src) noexcept
 {
 	if ( this != &src )
 	{
-		intos_ = std::move(src.intos_);
-		uses_ = std::move(src.uses_);
-		swap(sql_, src.sql_);
-		sql_.clear();
-		src.sql_.clear();
+		query().swap(*this);
+		swap(src);
 	}
 	return *this;
 }
 
-void query::sql(string_t const& text)
+query::~query() = default;
+
+void query::swap(query& other) noexcept
 {
-	sql_.str(text);
-	sql_.seekp(0, std::ios_base::end).clear();
+    intos_.swap(other.intos_);
+    uses_.swap(other.uses_);
+    sql_.swap(other.sql_);
+}
+
+string_t query::sql() const
+{
+    return sql_.str();
 }
 //----------------------------------------------------------------------------
 
-void query::clear() // throw()
+void query::clear() noexcept
 {
 	intos_.clear();
 	uses_.clear();
-	sql(string_t());
-}
-//----------------------------------------------------------------------------
-
-bool query::empty() const // throw()
-{
-	return sql_.str().empty() && intos_.empty() && uses_.empty();
+    sql_.str(string_t());
+    sql_.clear();
 }
 //----------------------------------------------------------------------------
 
@@ -86,6 +71,12 @@ query& query::put(into_binder_ptr i)
 }
 //----------------------------------------------------------------------------
 
+query& query::operator,(into_binder_ptr i)
+{
+    return put(std::move(i));
+}
+//----------------------------------------------------------------------------
+
 query& query::put(use_binder_ptr u)
 {
 	if ( !u )
@@ -97,18 +88,24 @@ query& query::put(use_binder_ptr u)
 }
 //----------------------------------------------------------------------------
 
+query& query::operator,(use_binder_ptr u)
+{
+    return put(std::move(u));
+}
+//----------------------------------------------------------------------------
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
 // prepare_query
 //
-prepare_query::prepare_query(statement& st)
+prepare_query::prepare_query(statement& st) noexcept
 	: st_(&st)
 {
 }
 
-prepare_query::prepare_query(prepare_query&& src)
-	: query(std::move(src))
+prepare_query::prepare_query(prepare_query&& src) noexcept
+	: query(static_cast<query&&>(src))
 	, st_(src.st_)
 {
 	src.st_ = nullptr;
@@ -118,8 +115,8 @@ prepare_query::~prepare_query()
 {
 	if ( st_ )
 	{
-		st_->q() = std::move(*this);
-		st_->finalize();
+        st_->finalize(false);
+        st_->q().swap(*this);
 	}
 }
 
@@ -128,31 +125,27 @@ prepare_query::~prepare_query()
 // once_query
 //
 
-once_query::once_query(session& s)
+once_query::once_query(session& s) noexcept
 	: s_(&s)
 {
 }
 //----------------------------------------------------------------------------
 
-once_query::once_query(once_query&& src)
-	: query(std::move(src))
+once_query::once_query(once_query&& src) noexcept
+	: query(static_cast<query&&>(src))
 	, s_(src.s_)
 {
 	src.s_ = nullptr;
 }
 //----------------------------------------------------------------------------
 
-once_query::~once_query()
+once_query::~once_query() noexcept(false)
 {
 	if ( s_ )
 	{
-		if ( !s_->is_open() )
-		{
-			throw session_not_open();
-		}
 		// execute statement in session.
 		statement st(*s_);
-		st.q() = std::move(*this);
+		st.q().swap(*this);
 		st.exec();
 	}
 }
