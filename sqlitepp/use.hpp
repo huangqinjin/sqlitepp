@@ -19,129 +19,82 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-/// Positional use binder.
+/// Anonymous parameter use binder, for ?
 template<typename T>
-class use_pos_binder : public use_binder
+class use_nameless_binder : public use_binder
 {
 public:
-	explicit use_pos_binder(T& value)
-		: value_(value)
-	{
-	}
+    explicit use_nameless_binder(T&& value)
+        : value_(std::forward<T>(value)) {}
+
+    int bind(statement& st, int pos) override
+    {
+        st.use_value(pos, converter<typename std::decay<T>::type>::from(this->value_));
+        return pos;
+    }
 
 protected:
-	T& value_;
-
-private:
-	void do_bind(statement& st, int pos)
-	{
-		st.use_value(pos, converter<T>::from(this->value_));
-	}
+    T value_;
 };
 
+/// Positional use binder, for ?NNN
 template<typename T>
-class use_pos_binder_const : public use_binder
+class use_pos_binder : public use_nameless_binder<T>
 {
 public:
-	explicit use_pos_binder_const(T const& value)
-		: value_(value)
-	{
-	}
+    use_pos_binder(T&& value, int pos)
+        : use_nameless_binder<T>(std::forward<T>(value))
+        , pos_(pos) {}
+
+    int bind(statement& st, int) override
+    {
+        return use_nameless_binder<T>::bind(st, pos_);
+    }
 
 protected:
-	T const value_;
-
-private:
-	void do_bind(statement& st, int pos)
-	{
-		st.use_value(pos, converter<T>::from(this->value_));
-	}
+    int pos_;
 };
 
-/// Named use binder.
+/// Named use binder, for :AAAA, @AAAA, $AAAA
 template<typename T>
 class use_name_binder : public use_pos_binder<T>
 {
 public:
-	use_name_binder(T& value, string_t const& name)
-		: use_pos_binder<T>(value)
-		, name_(name)
+	use_name_binder(T&& value, string_t const& name)
+		: use_pos_binder<T>(std::forward<T>(value), -1)
+		, name_(name) {}
+
+	int bind(statement& st, int) override
 	{
+	    if (this->pos_ < 0) this->pos_ = st.use_pos(this->name_);
+	    return use_pos_binder<T>::bind(st, this->pos_);
 	}
 
-private:
-	void do_bind(statement& st, int)
-	{
-		st.use_value(st.use_pos(this->name_), converter<T>::from(this->value_));
-	}
-
-	string_t const name_;
-};
-template<typename T>
-class use_name_binder_const : public use_pos_binder_const<T>
-{
-public:
-	use_name_binder_const(T const& value, string_t const& name)
-		: use_pos_binder_const<T>(value)
-		, name_(name)
-	{
-	}
-
-private:
-	void do_bind(statement& st, int)
-	{
-		st.use_value(st.use_pos(this->name_), converter<T>::from(this->value_));
-	}
-
+protected:
 	string_t const name_;
 };
 
-// Create position use binding for reference t.
+// Create anonymous parameter use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T& t)
+inline use_binder_ptr use(T&& t)
 {
-	return use_binder_ptr(new use_pos_binder<T>(t));
+	return use_binder_ptr(new use_nameless_binder<T>(std::forward<T>(t)));
 }
+//----------------------------------------------------------------------------
 
+// Create positional use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T const& t)
+inline use_binder_ptr use(T&& t, int pos)
 {
-	return use_binder_ptr(new use_pos_binder_const<T>(t));
-}
-
-inline use_binder_ptr use(utf8_char const* t)
-{
-	return use_binder_ptr(new use_pos_binder_const<utf8_char const*>(t));
-}
-
-inline use_binder_ptr use(utf16_char const* t)
-{
-	return use_binder_ptr(new use_pos_binder_const<utf16_char const*>(t));
+    return use_binder_ptr(new use_pos_binder<T>(std::forward<T>(t), pos));
 }
 //----------------------------------------------------------------------------
 
 // Create named use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T& t, string_t const& name)
+inline use_binder_ptr use(T&& t, string_t const& name)
 {
-	return use_binder_ptr(new use_name_binder<T>(t, name));
-}
-
-template<typename T>
-inline use_binder_ptr use(T const& t, string_t const& name)
-{
-	return use_binder_ptr(new use_name_binder_const<T>(t, name));
-}
-//----------------------------------------------------------------------------
-
-inline use_binder_ptr use(utf8_char const* t, string_t const& name)
-{
-	return use_binder_ptr(new use_name_binder_const<utf8_char const*>(t, name));
-}
-
-inline use_binder_ptr use(utf16_char const* t, string_t const& name)
-{
-	return use_binder_ptr(new use_name_binder_const<utf16_char const*>(t, name));
+	return use_binder_ptr(new use_name_binder<T>(std::forward<T>(t), name));
 }
 //----------------------------------------------------------------------------
 

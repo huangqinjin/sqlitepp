@@ -67,13 +67,13 @@ void statement::prepare()
 			throw multi_stmt_not_supported();
 		}
 
+        int index = 0;
 		// bind into binders
-		std::accumulate(q_.intos_.begin(), q_.intos_.end(), 0,
-			[this](int pos, into_binder_ptr& i) { return i->bind(*this, pos); });
+        for (auto& i : q_.intos_) index = 1 + i->bind(*this, index);
 
 		// bind use binders
-		std::accumulate(q_.uses_.begin(), q_.uses_.end(), 1,
-			[this](int pos, use_binder_ptr& u) { return u->bind(*this, pos); });
+        index = 1;
+		for (auto& u : q_.uses_) index = 1 + u->bind(*this, index);
 	}
 	catch (...)
 	{
@@ -98,8 +98,7 @@ bool statement::exec()
 		case SQLITE_ROW:
             s_.last_exec_ = true;
             // statement has result (select for ex.) - update into holders
-			std::for_each(q_.intos_.begin(), q_.intos_.end(),
-				[this](into_binder_ptr& i) { i->update(*this); });
+            for (auto& i : q_.intos_) i->update(*this);
             break;
 		case SQLITE_DONE:
             s_.last_exec_ = false;
@@ -126,8 +125,8 @@ void statement::reset(bool rebind)
 		s_.check_error( sqlite3_reset(impl_) );
 		if ( rebind )
 		{
-			std::accumulate(q_.uses_.begin(), q_.uses_.end(), 1,
-				[this](int pos, use_binder_ptr& u) { return u->bind(*this, pos); });
+            int index = 1;
+            for (auto& u : q_.uses_) index = 1 + u->bind(*this, index);
 		}
 	}
 }

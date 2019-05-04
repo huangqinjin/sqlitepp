@@ -24,25 +24,27 @@ template<typename T>
 class into_pos_binder : public into_binder
 {
 public:
-	explicit into_pos_binder(T& value)
-		: pos_(-1)
+	explicit into_pos_binder(T& value, int pos)
+		: pos_(pos)
 		, value_(value)
 	{
 	}
 
+    int bind(statement&, int pos) override
+    {
+	    if (this->pos_ < 0) this->pos_ = pos;
+	    return this->pos_;
+    }
+
+    void update(statement& st) override
+    {
+        typename converter<T>::base_type t;
+        st.column_value(this->pos_, t);
+        this->value_ = converter<T>::to(t);
+    }
+
 protected:
 	int pos_;
-
-private:
-	void do_bind(statement&, int pos) { this->pos_ = pos; }
-
-	void do_update(statement& st)
-	{
-		typename converter<T>::base_type t;
-		st.column_value(this->pos_, t);
-		this->value_ = converter<T>::to(t);
-	}
-
 	T& value_;
 };
 
@@ -52,28 +54,27 @@ class into_name_binder : public into_pos_binder<T>
 {
 public:
 	into_name_binder(T& value, string_t const& name)
-		: into_pos_binder<T>(value)
-		, name_(name)
-	{
-	}
+		: into_pos_binder<T>(value, -1)
+		, name_(name) {}
 
-private:
-	void do_bind(statement& st, int)
+	int bind(statement& st, int) override
 	{
 		if ( this->pos_ < 0 )
 		{
 			this->pos_ = st.column_index(this->name_);
 		}
+        return this->pos_;
 	}
 
+protected:
 	string_t const name_;
 };
 
 // Create position into binding for reference t.
 template<typename T>
-inline into_binder_ptr into(T& t)
+inline into_binder_ptr into(T& t, int pos = -1)
 {
-	return into_binder_ptr(new into_pos_binder<T>(t));
+	return into_binder_ptr(new into_pos_binder<T>(t, pos));
 }
 //----------------------------------------------------------------------------
 

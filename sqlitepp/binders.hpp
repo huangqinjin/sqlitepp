@@ -22,21 +22,16 @@ class statement;
 class into_binder
 {
 public:
-	into_binder() {}
-	virtual ~into_binder() {}
+	into_binder() = default;
+	virtual ~into_binder() = default;
+    into_binder(into_binder const&) = delete;
+    into_binder& operator=(into_binder const&) = delete;
 
-	// Bind value to statement st in positin pos.
-	int bind(statement& st, int pos);
+	// Bind value to statement st in position pos.
+	virtual int bind(statement& st, int pos) = 0;
 
 	// Update bound value.
-	void update(statement& st);
-
-private:
-	into_binder(into_binder const&); // = delete;
-	into_binder& operator=(into_binder const&); // = delete;
-
-	virtual void do_bind(statement& st, int pos) = 0;
-	virtual void do_update(statement& st) = 0;
+    virtual void update(statement& st) = 0;
 };
 
 typedef std::unique_ptr<into_binder> into_binder_ptr;
@@ -45,17 +40,13 @@ typedef std::unique_ptr<into_binder> into_binder_ptr;
 class use_binder
 {
 public:
-	use_binder() {}
-	virtual ~use_binder() {}
+    use_binder() = default;
+    virtual ~use_binder() = default;
+    use_binder(use_binder const&) = delete;
+    use_binder& operator=(use_binder const&) = delete;
 
 	/// Bind value to statement st in position pos
-	int bind(statement& st, int pos);
-
-private:
-	use_binder(use_binder const&); // = delete;
-	use_binder& operator=(use_binder const&); // = delete;
-
-	virtual void do_bind(statement& st, int pos) = 0;
+    virtual int bind(statement& st, int pos) = 0;
 };
 
 typedef std::unique_ptr<use_binder> use_binder_ptr;
