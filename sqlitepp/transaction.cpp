@@ -43,7 +43,7 @@ transaction::transaction(session& s, type t)
 		break;
 	}
 
-	*s_ << utf(begin_cmd);
+	*s_ << begin_cmd;
 	s_->active_txn_ = this;
 }
 //----------------------------------------------------------------------------
@@ -65,7 +65,7 @@ void transaction::rollback()
 {
 	if ( s_ )
 	{
-		*s_ << utf("rollback");
+		*s_ << "rollback";
         s_->active_txn_ = nullptr;
         s_ = nullptr;
 	}
@@ -76,7 +76,7 @@ void transaction::commit()
 {
 	if ( s_ )
 	{
-		*s_ << utf("commit");
+		*s_ << "commit";
         s_->active_txn_ = nullptr;
 		s_ = nullptr;
 	}

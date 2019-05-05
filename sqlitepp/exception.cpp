@@ -5,10 +5,7 @@
 // Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <sqlite3.h>
-
 #include "exception.hpp"
-#include "session.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -16,29 +13,34 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-exception::exception(int code, string_t const& msg)
-	: std::runtime_error(reinterpret_cast<char const*>(utf8(msg).c_str()))
+exception::exception(int code, text const& msg) noexcept
+	: std::runtime_error(msg)
 	, code_(code)
 {
 }
 
-nested_txn_not_supported::nested_txn_not_supported()
-	: exception(-1, utf("nested transactions are not supported"))
+int exception::code() const noexcept
+{
+    return code_;
+}
+
+nested_txn_not_supported::nested_txn_not_supported() noexcept
+	: exception(-1, "nested transactions are not supported")
 {
 }
 
-no_such_column::no_such_column(string_t const& col_name)
-	: exception(-2, utf("no such column '") + col_name + utf("'"))
+no_such_column::no_such_column(text const& column) noexcept
+	: exception(-2, "no such column '" + column.to_string() + "'")
 {
 }
 
-session_not_open::session_not_open()
-	: exception(-3, utf("session not open"))
+session_not_open::session_not_open() noexcept
+	: exception(-3, "session not open")
 {
 }
 
-multi_stmt_not_supported::multi_stmt_not_supported()
-	: exception(-4, utf("only one statement is supported"))
+multi_stmt_not_supported::multi_stmt_not_supported() noexcept
+	: exception(-4, "only one statement is supported")
 {
 }
 

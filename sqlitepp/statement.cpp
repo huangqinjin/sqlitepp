@@ -5,9 +5,7 @@
 // Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <algorithm>
-#include <numeric>
-#include <type_traits>
+#include <cstring>
 
 #include <sqlite3.h>
 
@@ -29,7 +27,7 @@ statement::statement(session& s) noexcept
 }
 //----------------------------------------------------------------------------
 
-statement::statement(session& s, string_t const& sql)
+statement::statement(session& s, struct text const& sql)
 	: statement(s)
 {
     q_ << sql;
@@ -55,13 +53,11 @@ void statement::prepare()
 {
 	try
 	{
-		typedef std::conditional<sizeof(char_t) == sizeof(utf8_char), char const*, void const*>::type tail_type;
-		char_t const* tail = nullptr;
-		string_t const sql = q_.sql();
-		s_.check_error(
-			aux::select(sqlite3_prepare_v2, sqlite3_prepare16_v2)(s_.impl(), sql.c_str(),
-                static_cast<int>((sql.size() + 1) * sizeof(char_t)), // nByte is the number of bytes in the input string including the nul-terminator.
-				&impl_, reinterpret_cast<tail_type*>(&tail)) );
+		char const* tail = nullptr;
+		std::string const sql = q_.sql();
+		s_.check_error(sqlite3_prepare_v2(s_.impl(), sql.c_str(),
+                sql.size() + 1, // nByte is the number of bytes in the input string including the nul-terminator.
+                &impl_, &tail));
 		if ( tail && *tail )
 		{
 			throw multi_stmt_not_supported();
@@ -178,20 +174,19 @@ int statement::column_count() const
 }
 //----------------------------------------------------------------------------
 
-string_t statement::column_name(int column) const
+struct text statement::column_name(int column) const
 {
-	char_t const* name = reinterpret_cast<char_t const*>
-		(aux::select(sqlite3_column_name, sqlite3_column_name16)(impl_, column));
+	char const* name = sqlite3_column_name(impl_, column);
     s_.check_last_error();
 	return name;
 }
 //----------------------------------------------------------------------------
 
-int statement::column_index(string_t const& name) const
+int statement::column_index(struct text const& name) const
 {
 	for (int c = 0, cc = column_count(); c < cc; ++c)
 	{
-		if ( name == column_name(c) )
+		if ( std::strcmp(sqlite3_column_name(impl_, c), name.data) == 0 )
 		{
 			return c;
 		}
@@ -231,19 +226,17 @@ void statement::column_value(int column, double& value) const
 }
 //----------------------------------------------------------------------------
 
-void statement::column_value(int column, string_t& value) const
+void statement::column_value(int column, struct text& value) const
 {
-	char_t const* str = reinterpret_cast<char_t const*>(
-		aux::select(sqlite3_column_text, sqlite3_column_text16)(impl_, column));
+    struct text t;
+
+    t.data = (char const*)sqlite3_column_text(impl_, column);
     s_.check_last_error();
-	if ( str )
-	{
-		value = str;
-	}
-	else
-	{
-		value.clear();
-	}
+
+    t.size = sqlite3_column_bytes(impl_, column);
+    s_.check_last_error();
+
+    value = t;
 }
 //----------------------------------------------------------------------------
 
@@ -259,12 +252,14 @@ void statement::column_value(int column, struct blob& value) const
 
 	b.size = sqlite3_column_bytes(impl_, column);
     s_.check_last_error();
+
+    value = b;
 }
 //----------------------------------------------------------------------------
 
-int statement::use_pos(string_t const& name) const
+int statement::use_pos(struct text const& name) const
 {
-	int pos = sqlite3_bind_parameter_index(impl_, utf8(name).c_str());
+	int pos = sqlite3_bind_parameter_index(impl_, name);
 	if ( pos <= 0 )
 	{
 		throw no_such_column(name);
@@ -303,23 +298,9 @@ void statement::use_value(int pos, long long value)
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, utf8_char const* value, bool copy)
+void statement::use_value(int pos, struct text const& value, bool copy)
 {
-	s_.check_error( sqlite3_bind_text(impl_, pos, value, -1, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
-}
-//----------------------------------------------------------------------------
-
-void statement::use_value(int pos, utf16_char const* value, bool copy)
-{
-	s_.check_error( sqlite3_bind_text16(impl_, pos, value, -1, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
-}
-//----------------------------------------------------------------------------
-
-void statement::use_value(int pos, string_t const& value, bool copy)
-{
-	s_.check_error( aux::select(sqlite3_bind_text, sqlite3_bind_text16)
-		(impl_, pos, value.empty()? nullptr : value.c_str(),
-		static_cast<int>(value.size() * sizeof(char_t)), copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
+	s_.check_error( sqlite3_bind_text(impl_, pos, value.data, value.size, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
 }
 //----------------------------------------------------------------------------
 

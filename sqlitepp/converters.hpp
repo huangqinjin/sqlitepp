@@ -8,12 +8,8 @@
 #ifndef SQLITEPP_CONVERTERS_HPP_INCLUDED
 #define SQLITEPP_CONVERTERS_HPP_INCLUDED
 
-#ifdef SQLITEPP_ENUM_CONVERTER
-	#include <boost/utility/enable_if.hpp>
-	#include <boost/type_traits/is_enum.hpp>
-#endif
-
 #include "string.hpp"
+#include <type_traits>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -53,59 +49,37 @@ template<> struct converter<long long> : converter_base<long long, long long> {}
 template<> struct converter<unsigned long long> : converter_base<unsigned long long, long long> {};
 template<> struct converter<float> : converter_base<float, double> {};
 template<> struct converter<double> : converter_base<double, double> {};
-template<> struct converter<utf8_char const*> : converter_base<utf8_char const*, utf8_char const*> {};
-template<> struct converter<utf16_char const*> : converter_base<utf16_char const*, utf16_char const*> {};
-template<> struct converter<utf32_char const*> : converter_base<utf32_char const*, utf32_char const*> {};
+template<> struct converter<text> : converter_base<text, text> {};
+template<> struct converter<blob> : converter_base<blob, blob> {};
 
-#ifdef SQLITEPP_ENUM_CONVERTER
 template<typename T>
-struct converter<T, typename boost::enable_if<boost::is_enum<T> >::type> : converter_base<T, int> {};
-#endif
+struct converter<T, typename std::enable_if<std::is_enum<T>::value>::type> : converter_base<T, int> {};
 
 template<>
-struct converter<string_t>
+struct converter<char const*>
 {
-	typedef string_t base_type;
-	static string_t const& to(string_t const& b)
-	{
-		return b;
-	}
-	static string_t const& from(string_t const& t)
-	{
-		return t;
-	}
+    typedef text base_type;
+    static char const* to(text const& b)
+    {
+        return b;
+    }
+    static text from(char const* t)
+    {
+        return t;
+    }
 };
 
 template<>
-struct converter<blob>
+struct converter<std::string>
 {
-	typedef blob base_type;
-	static blob const& to(blob const& b)
+	typedef text base_type;
+	static std::string to(text const& b)
 	{
-		return b;
+		return b.to_string();
 	}
-	static blob const& from(blob const& t)
+	static text from(std::string const& t)
 	{
 		return t;
-	}
-};
-
-template<typename T>
-struct converter<std::vector<T> >
-{
-	typedef blob base_type;
-	static std::vector<T> to(blob const& b)
-	{
-		T const* begin = reinterpret_cast<T const*>(b.data);
-		T const* end = begin + b.size / sizeof(T);
-		return std::vector<T>(begin, end);
-	}
-	static blob from(std::vector<T> const& t)
-	{
-		blob b;
-		b.data = t.empty()? nullptr : &t[0];
-		b.size = t.size() * sizeof(T);
-		return b;
 	}
 };
 

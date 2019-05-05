@@ -45,7 +45,7 @@ void query::swap(query& other) noexcept
     sql_.swap(other.sql_);
 }
 
-string_t query::sql() const
+std::string query::sql() const
 {
     return sql_.str();
 }
@@ -55,7 +55,7 @@ void query::clear() noexcept
 {
 	intos_.clear();
 	uses_.clear();
-    sql_.str(string_t());
+    sql_.str(std::string());
     sql_.clear();
 }
 //----------------------------------------------------------------------------

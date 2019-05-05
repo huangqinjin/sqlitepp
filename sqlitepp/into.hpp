@@ -53,9 +53,9 @@ template<typename T>
 class into_name_binder : public into_pos_binder<T>
 {
 public:
-	into_name_binder(T& value, string_t const& name)
+	into_name_binder(T& value, text const& name)
 		: into_pos_binder<T>(value, -1)
-		, name_(name) {}
+		, name_(name.to_string()) {}
 
 	int bind(statement& st, int) override
 	{
@@ -67,7 +67,7 @@ public:
 	}
 
 protected:
-	string_t const name_;
+	u8string const name_;
 };
 
 // Create position into binding for reference t.
@@ -80,7 +80,7 @@ inline into_binder_ptr into(T& t, int pos = -1)
 
 // Create named into binding for reference t.
 template<typename T>
-inline into_binder_ptr into(T& t, string_t const& name)
+inline into_binder_ptr into(T& t, text const& name)
 {
 	return into_binder_ptr(new into_name_binder<T>(t, name));
 }

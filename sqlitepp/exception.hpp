@@ -25,35 +25,33 @@ class exception : public std::runtime_error
 {
 public:
 	// create exception with UTF-8 encoded message
-	exception(int code, string_t const& msg);
+	exception(int code, text const& msg) noexcept;
 
 	// SQLite library error code.
-	int code() const // throw()
-	{
-		return code_;
-	}
+	int code() const noexcept;
+
 private:
 	int code_;
 };
 
 struct nested_txn_not_supported : exception
 {
-	nested_txn_not_supported();
+	nested_txn_not_supported() noexcept;
 };
 
 struct no_such_column : exception
 {
-	no_such_column(string_t const& col_name);
+	explicit no_such_column(text const& column) noexcept;
 };
 
 struct session_not_open : exception
 {
-	session_not_open();
+	session_not_open() noexcept;
 };
 
 struct multi_stmt_not_supported : exception
 {
-	multi_stmt_not_supported();
+	multi_stmt_not_supported() noexcept;
 };
 
 //////////////////////////////////////////////////////////////////////////////

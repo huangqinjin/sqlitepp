@@ -32,7 +32,7 @@ public:
 	explicit statement(session& s) noexcept;
 	
 	// Create statement with SQL query text.
-	statement(session& s, string_t const& sql);
+	statement(session& s, struct text const& sql);
 
     statement(statement&& src) noexcept;
     statement(statement const&) = delete;
@@ -77,9 +77,9 @@ public:
 	// Number of columns in result set of prepared statement.
 	int column_count() const;
 	// Column name in result set.
-	string_t column_name(int column) const;
+	struct text column_name(int column) const;
 	// Column index in result set.
-	int column_index(string_t const& name) const;
+	int column_index(struct text const& name) const;
 	// Colmn type of result set in prepared statement.
 	enum type { integer = 1, real = 2, text = 3, blob = 4, null = 5 };
 	// Column type in result set.
@@ -92,7 +92,7 @@ public:
 	// Column value as double.
 	void column_value(int column, double& value) const;
 	// Column value as string.
-	void column_value(int column, string_t& value) const;
+	void column_value(int column, struct text& value) const;
 	// Column value as BLOB.
 	void column_value(int column, struct blob& value) const;
 
@@ -106,7 +106,7 @@ public:
 	}
 
     // Get use position by name in query.
-    int use_pos(string_t const& name) const;
+    int use_pos(struct text const& name) const;
     // Get use parameter count in query.
     int use_count() const;
 
@@ -118,12 +118,8 @@ public:
 	void use_value(int pos, long long value);
 	// Use double value in query.
 	void use_value(int pos, double value);
-	// Use UTF-8 character string in query.
-	void use_value(int pos, utf8_char const* value, bool copy = false);
-	// Use UTF-16 character string in query.
-	void use_value(int pos, utf16_char const* value, bool copy = false);
-	// Use string value in query.
-	void use_value(int pos, string_t const& value, bool copy = false);
+	// Use UTF-8 string value in query.
+	void use_value(int pos, struct text const& value, bool copy = false);
 	// Use BLOB value in query.
 	void use_value(int pos, struct blob const& value, bool copy = false);
 

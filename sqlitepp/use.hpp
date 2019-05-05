@@ -60,9 +60,9 @@ template<typename T>
 class use_name_binder : public use_pos_binder<T>
 {
 public:
-	use_name_binder(T&& value, string_t const& name)
+	use_name_binder(T&& value, text const& name)
 		: use_pos_binder<T>(std::forward<T>(value), -1)
-		, name_(name) {}
+		, name_(name.to_string()) {}
 
 	int bind(statement& st, int) override
 	{
@@ -71,7 +71,7 @@ public:
 	}
 
 protected:
-	string_t const name_;
+    u8string const name_;
 };
 
 // Create anonymous parameter use binding for reference t.
@@ -92,7 +92,7 @@ inline use_binder_ptr use(T&& t, int pos)
 
 // Create named use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T&& t, string_t const& name)
+inline use_binder_ptr use(T&& t, text const& name)
 {
 	return use_binder_ptr(new use_name_binder<T>(std::forward<T>(t), name));
 }

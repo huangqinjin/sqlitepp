@@ -19,22 +19,6 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
-
-string_t last_error_msg(sqlite3* impl)
-{
-    return reinterpret_cast<char_t const*>
-		(aux::select(::sqlite3_errmsg, ::sqlite3_errmsg16)(impl));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-} // namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
-
 // Create an empty session.
 session::session() noexcept
 	: impl_(nullptr)
@@ -44,10 +28,10 @@ session::session() noexcept
 }
 //----------------------------------------------------------------------------
 
-session::session(string_t const& file_name, unsigned flags)
+session::session(text const& filename, unsigned flags)
 	: session()
 {
-	open(file_name, flags);
+	open(filename, flags);
 }
 //----------------------------------------------------------------------------
 
@@ -58,7 +42,7 @@ session::~session()
 }
 //----------------------------------------------------------------------------
 
-void session::open(string_t const& file_name, unsigned flags)
+void session::open(text const& filename, unsigned flags)
 {
 	// close previous session
 	close(true);
@@ -70,7 +54,7 @@ void session::open(string_t const& file_name, unsigned flags)
 
 	flags |= SQLITE_OPEN_URI;
 
-	int const r = sqlite3_open_v2(utf8(file_name).c_str(), &impl_, flags, nullptr);
+	int const r = sqlite3_open_v2(filename, &impl_, flags, nullptr);
 	if ( r != SQLITE_OK )
 	{
 	    struct closer
@@ -80,7 +64,7 @@ void session::open(string_t const& file_name, unsigned flags)
         } _ {this}; // session should be closed anyway
         // If NULL is passed, we assume a malloc() failed during sqlite3_open().
         // @see sqlite3_errcode()
-        throw exception(sqlite3_extended_errcode(impl_), last_error_msg(impl_));
+        throw exception(sqlite3_extended_errcode(impl_), sqlite3_errmsg(impl_));
 	}
 }
 //----------------------------------------------------------------------------
@@ -136,13 +120,13 @@ long long session::last_insert_rowid() const noexcept
 }
 //----------------------------------------------------------------------------
 
-size_t session::last_changes() const noexcept
+std::size_t session::last_changes() const noexcept
 {
 	return impl_ ? sqlite3_changes(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 
-size_t session::total_changes() const noexcept
+std::size_t session::total_changes() const noexcept
 {
 	return impl_ ? sqlite3_total_changes(impl_) : 0;
 }
@@ -167,10 +151,10 @@ void session::check_error(int code) const
     // In that case, the error code and message may or may not be set.
     // e.g.: API called with finalized prepared statement. @see sqlite3_finalize()
     case SQLITE_MISUSE:
-        throw exception(code, utf(sqlite3_errstr(code)));
+        throw exception(code, sqlite3_errstr(code));
 
     default:
-        throw exception(code, last_error_msg(impl_));
+        throw exception(code, sqlite3_errmsg(impl_));
     }
 }
 //----------------------------------------------------------------------------

@@ -44,7 +44,7 @@ public:
 	void swap(query& other) noexcept;
 
     // Current SQL statement.
-    string_t sql() const;
+    std::string sql() const;
 
 	// Clear sql text, into and use bindings.
 	void clear() noexcept;
@@ -69,7 +69,7 @@ private:
 	std::vector<into_binder_ptr> intos_;
 	std::vector<use_binder_ptr> uses_;
 
-	std::basic_ostringstream<char_t> sql_;
+	std::ostringstream sql_;
 };
 
 // Statement preparing proxy.

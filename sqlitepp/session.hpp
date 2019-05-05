@@ -41,7 +41,7 @@ public:
 	// Create and open session.
 	// Optional parameter flags for file open operations
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	explicit session(string_t const& file_name, unsigned flags = read | write | create);
+	explicit session(text const& filename, unsigned flags = read | write | create);
 
     session(session const&) = delete;
     session& operator=(session const&) = delete;
@@ -52,7 +52,7 @@ public:
 	// Open database session. Previous one will be closed.
 	// Optional parameter flags for file open operations
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	void open(string_t const& file_name, unsigned flags = read | write | create);
+	void open(text const& filename, unsigned flags = read | write | create);
 	
 	// Close database session.
 	void close(bool force = false);
@@ -86,11 +86,11 @@ public:
 	
 	// The number of rows that were changed (or inserted or deleted)
 	// by the most recent SQL statement
-	size_t last_changes() const noexcept;
+	std::size_t last_changes() const noexcept;
 
 	// The number of rows that were changed (or inserted or deleted)
 	// since the database was opened
-	size_t total_changes() const noexcept;
+    std::size_t total_changes() const noexcept;
 
 	// Execute SQL query immediately.
 	// It might be useful for resultless statements like INSERT, UPDATE etc.
