@@ -13,6 +13,13 @@
 #include "exception.hpp"
 #include "transaction.hpp"
 
+#define SQLITEPP_SQL(s) #s, sizeof(#s)
+
+#define SQLITEPP_EXEC(sql, action) { \
+sqlite3_stmt* st = nullptr; \
+if (sqlite3_prepare(impl_, SQLITEPP_SQL(sql), &st, nullptr) == 0 && \
+    sqlite3_step(st) == SQLITE_ROW) action; sqlite3_finalize(st);  }
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
@@ -32,6 +39,13 @@ session::session(text const& filename, unsigned flags)
 	: session()
 {
 	open(filename, flags);
+}
+//----------------------------------------------------------------------------
+
+session::session(text const& filename, enum encoding encoding, unsigned flags)
+      : session()
+{
+    open(filename, encoding, flags);
 }
 //----------------------------------------------------------------------------
 
@@ -66,6 +80,28 @@ void session::open(text const& filename, unsigned flags)
         // @see sqlite3_errcode()
         throw exception(sqlite3_extended_errcode(impl_), sqlite3_errmsg(impl_));
 	}
+}
+//----------------------------------------------------------------------------
+
+void session::open(text const& filename, enum encoding encoding, unsigned flags)
+{
+    open(filename, flags);
+    switch (encoding)
+    {
+    case encoding::utf_8: SQLITEPP_EXEC(pragma encoding = "UTF-8",); break;
+    case encoding::utf_16le: SQLITEPP_EXEC(pragma encoding = "UTF-16LE",); break;
+    case encoding::utf_16be: SQLITEPP_EXEC(pragma encoding = "UTF-16BE",); break;
+    case encoding::utf_16: SQLITEPP_EXEC(pragma encoding = "UTF-16",); break;
+    default: break;
+    }
+}
+//----------------------------------------------------------------------------
+
+enum encoding session::encoding() const noexcept
+{
+    enum encoding e = encoding::unknown;
+    SQLITEPP_EXEC(pragma encoding, e = parse_encoding((const char*)sqlite3_column_text(st, 0)));
+    return e;
 }
 //----------------------------------------------------------------------------
 

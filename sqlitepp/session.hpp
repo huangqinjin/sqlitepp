@@ -43,6 +43,12 @@ public:
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
 	explicit session(text const& filename, unsigned flags = read | write | create);
 
+    // Create and open session.
+    // Parameter encoding for newly created database file storage
+    // Optional parameter flags for file open operations
+    // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+	explicit session(text const& filename, enum encoding encoding, unsigned flags = read | write | create);
+
     session(session const&) = delete;
     session& operator=(session const&) = delete;
 
@@ -53,7 +59,16 @@ public:
 	// Optional parameter flags for file open operations
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
 	void open(text const& filename, unsigned flags = read | write | create);
-	
+
+    // Open database session. Previous one will be closed.
+    // Parameter encoding for newly created database file storage
+    // Optional parameter flags for file open operations
+    // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+	void open(text const& filename, enum encoding encoding, unsigned flags = read | write | create);
+
+    // Current encoding.
+    enum encoding encoding() const noexcept;
+
 	// Close database session.
 	void close(bool force = false);
 
