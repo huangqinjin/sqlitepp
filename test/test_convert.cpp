@@ -40,7 +40,7 @@ struct converter<tm>
 template<>
 struct converter<my_data>
 {
-	typedef string_t base_type;
+	typedef text base_type;
 	
 	static string_t from(my_data const& src)
 	{
@@ -49,10 +49,10 @@ struct converter<my_data>
 		return utf(buf);
 	}
 	
-	static my_data to(string_t const& src)
+	static my_data to(text const& src)
 	{
 		my_data result;
-		result.value = atoi(utf8(src).c_str());
+		result.value = atoi(src.data);
 		return result;
 	}
 };
@@ -131,7 +131,6 @@ void object::test<3>()
 template<>template<>
 void object::test<4>()
 {
-#ifdef SQLITEPP_ENUM_CONVERTER
 	enum enum_type { VAL1, VAL2, VAL3 } val;
 	transaction txn(se);
 
@@ -146,7 +145,6 @@ void object::test<4>()
 	se << utf("insert into enum_test(val) values(:val)"), use(1000);
 	se << utf("select val from enum_test"), into(val);
 	ensure_equals("out of enum", val, 1000);
-#endif
 }
 
 template<>template<>
@@ -158,7 +156,7 @@ void object::test<5>()
 	
 	my_data data, data2;
 	data.value = 99;
-	se << utf("insert into my_data(val) values(:val)"), use(data);
+	se << utf("insert into my_data(val) values(:val)"), use(data, true);
 	se << utf("select val from my_data"), into(data2);
 	ensure_equals("my_data", data2.value, data.value);
 }

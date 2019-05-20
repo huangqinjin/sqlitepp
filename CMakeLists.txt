@@ -17,3 +17,12 @@ else()
 endif()
 
 add_subdirectory(sqlitepp)
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()

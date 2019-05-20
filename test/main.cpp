@@ -15,7 +15,6 @@ namespace tut
 int main(int argc, char** argv)
 {
 	std::cout << "SQLite++ test application." << std::endl;
-	std::cout << "char_t size " << sizeof(sqlitepp::char_t) << std::endl;
 
 	tut::reporter callback;
 	tut::runner.get().set_callback(&callback);

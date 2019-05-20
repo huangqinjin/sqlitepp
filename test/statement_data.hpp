@@ -8,6 +8,28 @@
 
 #include "session_data.hpp"
 
+namespace sqlitepp
+{
+    template<typename T>
+    struct converter<std::vector<T> >
+    {
+        typedef blob base_type;
+        static std::vector<T> to(blob const& b)
+        {
+            T const* begin = reinterpret_cast<T const*>(b.data);
+            T const* end = begin + b.size / sizeof(T);
+            return std::vector<T>(begin, end);
+        }
+        static blob from(std::vector<T> const& t)
+        {
+            blob b;
+            b.data = t.empty()? nullptr : &t[0];
+            b.size = t.size() * sizeof(T);
+            return b;
+        }
+    };
+}
+
 using sqlitepp::string_t;
 
 struct statement_data : session_data

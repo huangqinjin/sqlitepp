@@ -73,7 +73,7 @@ void object::test<2>()
 {
 	ensure("no query", st.q().sql().empty());
 	ensure("not prepared", !st.is_prepared());
-	st.q().sql(utf("zzz"));
+	st.q() << utf("zzz");
 	ensure_equals("query == zzz", st.q().sql(), utf("zzz"));
 }
 
@@ -81,7 +81,7 @@ void object::test<2>()
 template<>template<>
 void object::test<3>()
 {
-	ensure("no query", st.q().empty());
+	ensure("no query", st.q().sql().empty());
 	try
 	{
 		st.exec();
@@ -97,8 +97,8 @@ void object::test<3>()
 template<>template<>
 void object::test<4>()
 {
-	ensure("no query", st.q().empty());
-	st.q().sql(utf("insert into some_table(id, name, salary) values(1, 'lisa', 23.345)"));
+	ensure("no query", st.q().sql().empty());
+	st.q() << utf("insert into some_table(id, name, salary) values(1, 'lisa', 23.345)");
 	
 	st.prepare();
 	ensure("prepared", st.is_prepared());
@@ -121,24 +121,24 @@ void object::test<5>()
 
 	ensure_equals("col count", st.column_count(), 4);
 
-	ensure_equals( "col 0 name", st.column_name(0), utf("id") );
+	ensure_equals( "col 0 name", st.column_name(0).to_string(), utf("id") );
 	ensure_equals( "col 0 index", st.column_index(utf("id")), 0 );
-	ensure_equals( "col 0 type", st.column_type(0), statement::COL_INT );
+	ensure_equals( "col 0 type", st.column_type(0), statement::integer );
 	ensure_equals( "col 0 value", st.get<int>(0), r.id );
 
-	ensure_equals( "col 1 name", st.column_name(1), utf("name") );
+	ensure_equals( "col 1 name", st.column_name(1).to_string(), utf("name") );
 	ensure_equals( "col 1 index", st.column_index(utf("name")), 1 );
-	ensure_equals( "col 1 type", st.column_type(1), statement::COL_TEXT );
+	ensure_equals( "col 1 type", st.column_type(1), statement::text );
 	ensure_equals( "col 1 value", st.get<sqlitepp::string_t>(1), r.name );
 
-	ensure_equals( "col 2 name", st.column_name(2), utf("salary") );
+	ensure_equals( "col 2 name", st.column_name(2).to_string(), utf("salary") );
 	ensure_equals( "col 2 index", st.column_index(utf("salary")), 2 );
-	ensure_equals( "col 2 type", st.column_type(2), statement::COL_FLOAT );
+	ensure_equals( "col 2 type", st.column_type(2), statement::real );
 	ensure_distance( "col 2 value", st.get<double>(2), r.salary, 0.01 );
 
-	ensure_equals( "col 3 name", st.column_name(3), utf("data") );
+	ensure_equals( "col 3 name", st.column_name(3).to_string(), utf("data") );
 	ensure_equals( "col 3 index", st.column_index(utf("data")), 3 );
-	ensure_equals( "col 3 type", st.column_type(3), statement::COL_NULL );
+	ensure_equals( "col 3 type", st.column_type(3), statement::null );
 
 	try
 	{
