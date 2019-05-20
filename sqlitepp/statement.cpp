@@ -288,25 +288,25 @@ int statement::use_count() const
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, std::nullptr_t)
+void statement::use_value(int pos, std::nullptr_t, bool)
 {
     s_.check_error( sqlite3_bind_null(impl_, pos) );
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, int value)
+void statement::use_value(int pos, int value, bool)
 {
 	s_.check_error( sqlite3_bind_int(impl_, pos, value) );
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, double value)
+void statement::use_value(int pos, double value, bool)
 {
 	s_.check_error( sqlite3_bind_double(impl_, pos, value) );
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, long long value)
+void statement::use_value(int pos, long long value, bool)
 {
 	s_.check_error( sqlite3_bind_int64(impl_, pos, value) );
 }

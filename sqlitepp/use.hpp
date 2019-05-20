@@ -24,17 +24,18 @@ template<typename T>
 class use_nameless_binder : public use_binder
 {
 public:
-    explicit use_nameless_binder(T&& value)
-        : value_(std::forward<T>(value)) {}
+    explicit use_nameless_binder(T&& value, bool copy)
+        : value_(std::forward<T>(value)), copy_(copy) {}
 
     int bind(statement& st, int pos) override
     {
-        st.use_value(pos, converter<typename std::decay<T>::type>::from(this->value_));
+        st.use_value(pos, converter<typename std::decay<T>::type>::from(this->value_), copy_);
         return pos;
     }
 
 protected:
     T value_;
+    bool copy_;
 };
 
 /// Positional use binder, for ?NNN
@@ -42,8 +43,8 @@ template<typename T>
 class use_pos_binder : public use_nameless_binder<T>
 {
 public:
-    use_pos_binder(T&& value, int pos)
-        : use_nameless_binder<T>(std::forward<T>(value))
+    use_pos_binder(T&& value, int pos, bool copy)
+        : use_nameless_binder<T>(std::forward<T>(value), copy)
         , pos_(pos) {}
 
     int bind(statement& st, int) override
@@ -60,8 +61,8 @@ template<typename T>
 class use_name_binder : public use_pos_binder<T>
 {
 public:
-	use_name_binder(T&& value, text const& name)
-		: use_pos_binder<T>(std::forward<T>(value), -1)
+	use_name_binder(T&& value, text const& name, bool copy)
+		: use_pos_binder<T>(std::forward<T>(value), -1, copy)
 		, name_(name.to_string()) {}
 
 	int bind(statement& st, int) override
@@ -76,25 +77,25 @@ protected:
 
 // Create anonymous parameter use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T&& t)
+inline use_binder_ptr use(T&& t, bool copy = false)
 {
-	return use_binder_ptr(new use_nameless_binder<T>(std::forward<T>(t)));
+	return use_binder_ptr(new use_nameless_binder<T>(std::forward<T>(t), copy));
 }
 //----------------------------------------------------------------------------
 
 // Create positional use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T&& t, int pos)
+inline use_binder_ptr use(T&& t, int pos, bool copy = false)
 {
-    return use_binder_ptr(new use_pos_binder<T>(std::forward<T>(t), pos));
+    return use_binder_ptr(new use_pos_binder<T>(std::forward<T>(t), pos, copy));
 }
 //----------------------------------------------------------------------------
 
 // Create named use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T&& t, text const& name)
+inline use_binder_ptr use(T&& t, text const& name, bool copy = false)
 {
-	return use_binder_ptr(new use_name_binder<T>(std::forward<T>(t), name));
+	return use_binder_ptr(new use_name_binder<T>(std::forward<T>(t), name, copy));
 }
 //----------------------------------------------------------------------------
 

@@ -113,13 +113,13 @@ public:
     int use_count() const;
 
     // Use null value in query.
-    void use_value(int pos, std::nullptr_t);
+    void use_value(int pos, std::nullptr_t, bool = false);
 	// Use int value in query.
-	void use_value(int pos, int value);
+	void use_value(int pos, int value, bool = false);
 	// Use 64-bit int value in query.
-	void use_value(int pos, long long value);
+	void use_value(int pos, long long value, bool = false);
 	// Use double value in query.
-	void use_value(int pos, double value);
+	void use_value(int pos, double value, bool = false);
     // Use BLOB value in query.
     void use_value(int pos, struct blob const& value, bool copy = false);
 	// Use UTF-8 string value in query.
