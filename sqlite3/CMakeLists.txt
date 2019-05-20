@@ -19,9 +19,11 @@ set(SQLITE_DEFAULT_WAL_SYNCHRONOUS "1" CACHE STRING
      2 - FULL. SQLite database engine will use the xSync method of the VFS to ensure that all content is safely written to the disk surface prior to continuing. This ensures that an operating system crash or power failure will not corrupt the database.
      3 - EXTRA. EXTRA synchronous is like FULL with the addition that the directory containing a rollback journal is synced after that journal is unlinked to commit a transaction in DELETE mode. EXTRA provides additional durability if the commit is followed closely by a power loss."
 )
-set_property(CACHE SQLITE_THREADSAFE PROPERTY STRINGS 0 1 2 3)
+set_property(CACHE SQLITE_DEFAULT_WAL_SYNCHRONOUS PROPERTY STRINGS 0 1 2 3)
 
 set(SQLITE_DEFAULT_MEMSTATUS "0" CACHE STRING "Determines whether or not sqlite3_status() interfaces that track memory usage to be enabled.")
+set_property(CACHE SQLITE_DEFAULT_MEMSTATUS PROPERTY STRINGS 0 1)
+
 set(SQLITE_MAX_EXPR_DEPTH "0" CACHE STRING "Determines the maximum expression tree depth. If the value is 0, then no limit is enforced. The current implementation has a default value of 1000.")
 option(SQLITE_OMIT_DECLTYPE "By omitting the (seldom-needed) ability to return the declared type of columns from the result set of query, prepared statements can be made to consume less memory." ON)
 option(SQLITE_OMIT_DEPRECATED "Omitting deprecated interfaces and features will reduce the library footprint." ON)
@@ -33,7 +35,7 @@ option(SQLITE_ENABLE_RTREE "Determines whether or not to include support for the
 option(SQLITE_ENABLE_FTS4 "Determines whether or not versions 3 and 4 of the full-text search engine to be added to the build." OFF)
 option(SQLITE_ENABLE_FTS5 "Determines whether or not versions 5 of the full-text search engine (fts5) to be added to the build." ON)
 
-list(APPEND SQLITE_OPTIONS SQLITE_LIKE_DOESNT_MATCH_BLOBS)
+list(APPEND SQLITE_OPTIONS SQLITE_LIKE_DOESNT_MATCH_BLOBS SQLITE_OMIT_AUTORESET)
 get_directory_property(ALL_OPTIONS CACHE_VARIABLES)
 foreach(OPTION ${ALL_OPTIONS})
     if("${OPTION}" MATCHES "^SQLITE_(ENABLE|DISABLE|USE|OMIT)_")
@@ -50,12 +52,20 @@ set(HEADER_FILES sqlite3.h sqlite3ext.h)
 set(SOURCE_FILES sqlite3.c)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-add_library(sqlitepp::sqlite3 ALIAS ${PROJECT_NAME})
+add_library(${PACKAGE_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADER_FILES}"
-                      INTERFACE_LINK_LIBRARIES "${CMAKE_DL_LIBS}")
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${SQLITE_OPTIONS})
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+list(APPEND SQLITE_DEPS Threads::Threads ${CMAKE_DL_LIBS})
+find_library(Math_LIBRARY NAMES m)
+if(Math_LIBRARY)
+    list(APPEND SQLITE_DEPS ${Math_LIBRARY})
+endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE ${SQLITE_DEPS})
 
 list(APPEND ALL_TARGETS ${PROJECT_NAME})
 
@@ -65,26 +75,20 @@ if(BUILD_SHELL)
     list(APPEND SQLITE_OPTIONS SQLITE_THREADSAFE=0)
     list(APPEND SQLITE_OPTIONS SQLITE_ENABLE_EXPLAIN_COMMENTS)
 
-    list(APPEND LIBRARIES ${CMAKE_DL_LIBS})
     find_path(Readline_INCLUDE_DIR NAMES readline/readline.h)
     find_library(Readline_LIBRARY NAMES readline)
-    find_library(Math_LIBRARY NAMES m)
     if(Readline_INCLUDE_DIR AND Readline_LIBRARY)
         list(APPEND SQLITE_OPTIONS HAVE_READLINE)
-        list(APPEND INCLUDE_DIRS ${Readline_INCLUDE_DIR})
-        list(APPEND LIBRARIES ${Readline_LIBRARY})
+    else()
+        unset(Readline_INCLUDE_DIR CACHE)
+        unset(Readline_LIBRARY CACHE)
     endif()
-    if(Math_LIBRARY)
-        list(APPEND LIBRARIES ${Math_LIBRARY})
-    endif()
-    unset(Readline_INCLUDE_DIR CACHE)
-    unset(Readline_LIBRARY CACHE)
-    unset(Math_LIBRARY CACHE)
+
     add_executable(shell shell.c ${SOURCE_FILES})
-    set_target_properties(shell PROPERTIES OUTPUT_NAME sqlite3)
+    set_target_properties(shell PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
     target_compile_definitions(shell PRIVATE ${SQLITE_OPTIONS})
-    target_include_directories(shell PRIVATE ${INCLUDE_DIRS})
-    target_link_libraries(shell PRIVATE ${LIBRARIES})
+    target_include_directories(shell PRIVATE ${Readline_INCLUDE_DIR})
+    target_link_libraries(shell PRIVATE ${Readline_LIBRARY} ${SQLITE_DEPS})
     list(APPEND ALL_TARGETS shell)
 endif()
 
@@ -92,7 +96,7 @@ endif()
 
 include(GNUInstallDirs)
 
-install(TARGETS ${ALL_TARGETS} EXPORT sqlitepp-targets
+install(TARGETS ${ALL_TARGETS} EXPORT ${PACKAGE_NAME}-targets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}        
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
