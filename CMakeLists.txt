@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.3)
 project(sqlitepp VERSION 1.0.0)
 set(PACKAGE_NAME ${PROJECT_NAME})
 
-option(BUILD_SQLITE3 "build sqlite3 shipped with sqlitepp" OFF)
+set(BUILD_SQLITE3 OFF CACHE STRING "build sqlite3 shipped with sqlitepp")
+set_property(CACHE BUILD_SQLITE3 PROPERTY STRINGS ON OFF STATIC SHARED OBJECT)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.3)
 project(sqlite3 VERSION 3.28.0)
 
 option(BUILD_SHELL "build sqlite3 shell" OFF)
@@ -46,16 +46,42 @@ foreach(OPTION ${ALL_OPTIONS})
         list(APPEND SQLITE_OPTIONS ${OPTION}=${${OPTION}})
     endif()
 endforeach()
-message(STATUS "Build SQLite with options: ${SQLITE_OPTIONS}")
+
+set(LIBRARY_TYPE ${BUILD_SQLITE3})
+if (LIBRARY_TYPE STREQUAL "ON")
+    if(BUILD_SHARED_LIBS)
+        set(LIBRARY_TYPE SHARED)
+    else()
+        set(LIBRARY_TYPE STATIC)
+    endif()
+endif()
 
 set(HEADER_FILES sqlite3.h sqlite3ext.h)
 set(SOURCE_FILES sqlite3.c)
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+add_library(${PROJECT_NAME} ${LIBRARY_TYPE} ${SOURCE_FILES} ${HEADER_FILES})
 add_library(${PACKAGE_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        PUBLIC_HEADER "${HEADER_FILES}"
+        POSITION_INDEPENDENT_CODE ON
+        C_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+)
 
+if(BUILD_SHARED_LIBS OR LIBRARY_TYPE STREQUAL "SHARED")
+    if(WIN32)
+        list(APPEND SQLITE_OPTIONS "SQLITE_API=__declspec(dllexport)")
+        target_compile_definitions(${PROJECT_NAME} INTERFACE "SQLITE_API=__declspec(dllimport)")
+    else()
+        list(APPEND SQLITE_OPTIONS "SQLITE_API=__attribute__((visibility(\"default\")))")
+    endif()
+endif()
+
+message(STATUS "Build ${LIBRARY_TYPE} SQLite with options: ${SQLITE_OPTIONS}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${SQLITE_OPTIONS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
