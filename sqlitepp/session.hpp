@@ -19,10 +19,8 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class transaction;
-
 // Database session. Noncopyable.
-class session
+class SQLITEPP_API session
 {
 	friend class transaction; // access to active_txn_
 	friend class statement;   // access to last_exec_

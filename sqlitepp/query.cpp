@@ -9,6 +9,7 @@
 #include "exception.hpp"
 #include "statement.hpp"
 #include "session.hpp"
+#include "string.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 

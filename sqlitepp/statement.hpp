@@ -22,10 +22,8 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class session;
-
 // Database statement, noncopyable
-class statement
+class SQLITEPP_API statement
 {
 public:
 	// Create an empty statement

@@ -10,16 +10,16 @@
 
 #include <memory>
 
+#include "fwd.hpp"
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class statement;
-
 /// into binder interface
-class into_binder
+class SQLITEPP_API into_binder
 {
 public:
 	into_binder() = default;
@@ -37,7 +37,7 @@ public:
 typedef std::unique_ptr<into_binder> into_binder_ptr;
 
 /// use binder interface
-class use_binder
+class SQLITEPP_API use_binder
 {
 public:
     use_binder() = default;

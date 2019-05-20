@@ -12,12 +12,13 @@
 #include <cassert>
 #include <iosfwd>
 
+#include "fwd.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
 
-struct blob
+struct SQLITEPP_API blob
 {
 	void const* data;
 	std::size_t size;
@@ -71,12 +72,12 @@ struct basic_text
     }
 };
 
-struct text : basic_text<char> { using basic_text::basic_text; };
-struct text16 : basic_text<char16_t> { using basic_text::basic_text; };
+struct SQLITEPP_API text : basic_text<char> { using basic_text::basic_text; };
+struct SQLITEPP_API text16 : basic_text<char16_t> { using basic_text::basic_text; };
 using u8string = text::string_t;
 using u16string = text16::string_t;
 
-std::ostream& operator<<(std::ostream& os, text const& t);
+SQLITEPP_API std::ostream& operator<<(std::ostream& os, text const& t);
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -89,8 +90,8 @@ enum class encoding
     utf_16,
 };
 
-text to_string(encoding e);
-encoding parse_encoding(const text& s);
+SQLITEPP_API text to_string(encoding e);
+SQLITEPP_API encoding parse_encoding(const text& s);
 
 //////////////////////////////////////////////////////////////////////////////
 

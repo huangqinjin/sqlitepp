@@ -8,16 +8,16 @@
 #ifndef SQLITEPP_TRANSACTION_HPP_INCLUDED
 #define SQLITEPP_TRANSACTION_HPP_INCLUDED
 
+#include "fwd.hpp"
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class session;
-
 // Transaction. Noncopyable.
-class transaction
+class SQLITEPP_API transaction
 {
 public:
 	// Transaction type

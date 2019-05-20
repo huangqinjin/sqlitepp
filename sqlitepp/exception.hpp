@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-#include "string.hpp"
+#include "fwd.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -18,10 +18,8 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class session;
-
 // SQLite exception
-class exception : public std::runtime_error
+class SQLITEPP_API exception : public std::runtime_error
 {
 public:
 	// create exception with UTF-8 encoded message
@@ -34,22 +32,22 @@ private:
 	int code_;
 };
 
-struct nested_txn_not_supported : exception
+struct SQLITEPP_API nested_txn_not_supported : exception
 {
 	nested_txn_not_supported() noexcept;
 };
 
-struct no_such_column : exception
+struct SQLITEPP_API no_such_column : exception
 {
 	explicit no_such_column(text const& column) noexcept;
 };
 
-struct session_not_open : exception
+struct SQLITEPP_API session_not_open : exception
 {
 	session_not_open() noexcept;
 };
 
-struct multi_stmt_not_supported : exception
+struct SQLITEPP_API multi_stmt_not_supported : exception
 {
 	multi_stmt_not_supported() noexcept;
 };

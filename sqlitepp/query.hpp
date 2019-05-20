@@ -10,9 +10,7 @@
 
 #include <vector>
 #include <sstream>
-#include <memory>
 
-#include "string.hpp"
 #include "binders.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -21,11 +19,8 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class session;
-class statement;
-
 // SQL query base class. Noncopyable.
-class query
+class SQLITEPP_API query
 {
 	friend class statement; // access to intos_ and uses_
 
@@ -73,7 +68,7 @@ private:
 };
 
 // Statement preparing proxy.
-class prepare_query : public query
+class SQLITEPP_API prepare_query : public query
 {
 	friend class statement; // access to ctor
 
@@ -95,7 +90,7 @@ private:
 };
 
 // Immediately executed query proxy, the result can be queried using session.last_exec().
-class once_query : public query
+class SQLITEPP_API once_query : public query
 {
 	friend class session; // access to ctor
 public:
