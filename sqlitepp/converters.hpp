@@ -49,8 +49,9 @@ template<> struct converter<long long> : converter_base<long long, long long> {}
 template<> struct converter<unsigned long long> : converter_base<unsigned long long, long long> {};
 template<> struct converter<float> : converter_base<float, double> {};
 template<> struct converter<double> : converter_base<double, double> {};
-template<> struct converter<text> : converter_base<text, text> {};
 template<> struct converter<blob> : converter_base<blob, blob> {};
+template<> struct converter<text> : converter_base<text, text> {};
+template<> struct converter<text16> : converter_base<text16, text16> {};
 
 template<typename T>
 struct converter<T, typename std::enable_if<std::is_enum<T>::value>::type> : converter_base<T, int> {};
@@ -70,17 +71,45 @@ struct converter<char const*>
 };
 
 template<>
-struct converter<std::string>
+struct converter<u8string>
 {
 	typedef text base_type;
-	static std::string to(text const& b)
+	static u8string to(text const& b)
 	{
 		return b.to_string();
 	}
-	static text from(std::string const& t)
+	static text from(u8string const& t)
 	{
 		return t;
 	}
+};
+
+template<>
+struct converter<char16_t const*>
+{
+    typedef text16 base_type;
+    static char16_t const* to(text16 const& b)
+    {
+        return b;
+    }
+    static text16 from(char16_t const* t)
+    {
+        return t;
+    }
+};
+
+template<>
+struct converter<u16string>
+{
+    typedef text16 base_type;
+    static u16string to(text16 const& b)
+    {
+        return b.to_string();
+    }
+    static text16 from(u16string const& t)
+    {
+        return t;
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////

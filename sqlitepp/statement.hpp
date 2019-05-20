@@ -80,7 +80,7 @@ public:
 	struct text column_name(int column) const;
 	// Column index in result set.
 	int column_index(struct text const& name) const;
-	// Colmn type of result set in prepared statement.
+	// Column type of result set in prepared statement.
 	enum type { integer = 1, real = 2, text = 3, blob = 4, null = 5 };
 	// Column type in result set.
 	type column_type(int column) const;
@@ -91,10 +91,12 @@ public:
 	void column_value(int column, long long& value) const;
 	// Column value as double.
 	void column_value(int column, double& value) const;
-	// Column value as string.
+    // Column value as BLOB.
+    void column_value(int column, struct blob& value) const;
+	// Column value as UTF-8 string.
 	void column_value(int column, struct text& value) const;
-	// Column value as BLOB.
-	void column_value(int column, struct blob& value) const;
+    // Column value as UTF-16 string.
+    void column_value(int column, struct text16& value) const;
 
 	// Get column value as type T.
 	template<typename T>
@@ -118,10 +120,12 @@ public:
 	void use_value(int pos, long long value);
 	// Use double value in query.
 	void use_value(int pos, double value);
+    // Use BLOB value in query.
+    void use_value(int pos, struct blob const& value, bool copy = false);
 	// Use UTF-8 string value in query.
 	void use_value(int pos, struct text const& value, bool copy = false);
-	// Use BLOB value in query.
-	void use_value(int pos, struct blob const& value, bool copy = false);
+    // Use UTF-16 string value in query.
+    void use_value(int pos, struct text16 const& value, bool copy = false);
 
 private:
 	session& s_;

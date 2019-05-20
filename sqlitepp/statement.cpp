@@ -226,20 +226,6 @@ void statement::column_value(int column, double& value) const
 }
 //----------------------------------------------------------------------------
 
-void statement::column_value(int column, struct text& value) const
-{
-    struct text t;
-
-    t.data = (char const*)sqlite3_column_text(impl_, column);
-    s_.check_last_error();
-
-    t.size = sqlite3_column_bytes(impl_, column);
-    s_.check_last_error();
-
-    value = t;
-}
-//----------------------------------------------------------------------------
-
 void statement::column_value(int column, struct blob& value) const
 {
     // Call sqlite3_column_blob() first to force the result into the desired format,
@@ -254,6 +240,34 @@ void statement::column_value(int column, struct blob& value) const
     s_.check_last_error();
 
     value = b;
+}
+//----------------------------------------------------------------------------
+
+void statement::column_value(int column, struct text& value) const
+{
+    struct text t;
+
+    t.data = (char const*)sqlite3_column_text(impl_, column);
+    s_.check_last_error();
+
+    t.size = sqlite3_column_bytes(impl_, column);
+    s_.check_last_error();
+
+    value = t;
+}
+//----------------------------------------------------------------------------
+
+void statement::column_value(int column, struct text16& value) const
+{
+    struct text16 t;
+
+    t.data = (char16_t const*)sqlite3_column_text16(impl_, column);
+    s_.check_last_error();
+
+    t.size = sqlite3_column_bytes16(impl_, column) / 2;
+    s_.check_last_error();
+
+    value = t;
 }
 //----------------------------------------------------------------------------
 
@@ -298,12 +312,6 @@ void statement::use_value(int pos, long long value)
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, struct text const& value, bool copy)
-{
-	s_.check_error( sqlite3_bind_text(impl_, pos, value.data, value.size, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
-}
-//----------------------------------------------------------------------------
-
 void statement::use_value(int pos, struct blob const& value, bool copy)
 {
     if (value.data == nullptr && value.size > 0)
@@ -315,6 +323,20 @@ void statement::use_value(int pos, struct blob const& value, bool copy)
         s_.check_error( sqlite3_bind_blob(impl_, pos, value.data,
             static_cast<int>(value.size), copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
     }
+}
+//----------------------------------------------------------------------------
+
+void statement::use_value(int pos, struct text const& value, bool copy)
+{
+    s_.check_error( sqlite3_bind_text(impl_, pos, value.data,
+            (value.size == -1) ? -1 : (int)value.size, copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
+}
+//----------------------------------------------------------------------------
+
+void statement::use_value(int pos, struct text16 const& value, bool copy)
+{
+    s_.check_error( sqlite3_bind_text16(impl_, pos, value.data,
+            (value.size == -1) ? -1 : (int)(value.size * 2), copy ? SQLITE_TRANSIENT : SQLITE_STATIC) );
 }
 
 //////////////////////////////////////////////////////////////////////////////
