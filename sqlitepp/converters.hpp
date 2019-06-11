@@ -23,16 +23,16 @@ struct converter;
 template<typename T, typename U>
 struct converter_base
 {
-	typedef U base_type;
-	static T to(U u) { return static_cast<T>(u); }
-	static U from(T t) { return static_cast<U>(t); }
+    typedef U base_type;
+    static T to(U u) { return static_cast<T>(u); }
+    static U from(T t) { return static_cast<U>(t); }
 };
 
 template<> struct converter<bool> : converter_base<bool, int>
 {
-	// resolve Visual C++ warning C4800
-	static bool to(int u) { return u != 0; }
-	static int from(bool t) { return t; }
+    // resolve Visual C++ warning C4800
+    static bool to(int u) { return u != 0; }
+    static int from(bool t) { return t; }
 };
 
 template<> struct converter<char> : converter_base<char, int> {};
@@ -73,15 +73,15 @@ struct converter<char const*>
 template<>
 struct converter<u8string>
 {
-	typedef text base_type;
-	static u8string to(text const& b)
-	{
-		return b.to_string();
-	}
-	static text from(u8string const& t)
-	{
-		return t;
-	}
+    typedef text base_type;
+    static u8string to(text const& b)
+    {
+        return b.to_string();
+    }
+    static text from(u8string const& t)
+    {
+        return t;
+    }
 };
 
 template<>

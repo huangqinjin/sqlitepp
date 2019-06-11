@@ -23,57 +23,57 @@ txn_test_group txn_g("5. transaction");
 template<>template<>
 void object::test<1>()
 {
-	int rows;
-	ensure( "no active txn", !se.active_txn() );
-	{
-		transaction t(se);
-		ensure_equals( "this active txn", se.active_txn(), &t );
-		
-		record r1(1, utf("Dima"), 566.24);
-		r1.insert(se);
+    int rows;
+    ensure( "no active txn", !se.active_txn() );
+    {
+        transaction t(se);
+        ensure_equals( "this active txn", se.active_txn(), &t );
+        
+        record r1(1, utf("Dima"), 566.24);
+        r1.insert(se);
 
-		se << utf("select count(*) from some_table"), into(rows);
-		ensure_equals("row inserted", rows, 1);
-	}
-	ensure( "no active txn", !se.active_txn() );
-	se << utf("select count(*) from some_table"), into(rows);
-	ensure_equals("rollback", rows, 0);
+        se << utf("select count(*) from some_table"), into(rows);
+        ensure_equals("row inserted", rows, 1);
+    }
+    ensure( "no active txn", !se.active_txn() );
+    se << utf("select count(*) from some_table"), into(rows);
+    ensure_equals("rollback", rows, 0);
 }
 
 // explicit commit
 template<>template<>
 void object::test<2>()
 {
-	{
-		transaction t(se);
-		record r1(1, utf("Eugeny"), 566.24);
-		r1.insert(se);
-		t.commit();
-	}
-	ensure( "no active txn", !se.active_txn() );
+    {
+        transaction t(se);
+        record r1(1, utf("Eugeny"), 566.24);
+        r1.insert(se);
+        t.commit();
+    }
+    ensure( "no active txn", !se.active_txn() );
 
-	int rows;
-	se << utf("select count(*) from some_table"), into(rows);
-	ensure_equals("commit", rows, 1);
+    int rows;
+    se << utf("select count(*) from some_table"), into(rows);
+    ensure_equals("commit", rows, 1);
 }
 
 // nested transactions
 template<>template<>
 void object::test<3>()
 {
-	transaction t1(se, transaction::immediate);
-	try
-	{
-		transaction t2(se, transaction::exclusive);
-		fail("nested_txn_exception expected");
-	}
-	catch (nested_txn_not_supported const&)
-	{
-	}
-	catch (...)
-	{
-		fail("nested_txn_not_supported expected");
-	}
+    transaction t1(se, transaction::immediate);
+    try
+    {
+        transaction t2(se, transaction::exclusive);
+        fail("nested_txn_exception expected");
+    }
+    catch (nested_txn_not_supported const&)
+    {
+    }
+    catch (...)
+    {
+        fail("nested_txn_not_supported expected");
+    }
 }
 
 } // namespace

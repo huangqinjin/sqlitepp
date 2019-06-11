@@ -400,8 +400,8 @@ namespace tut
         test_result tr = i->second->run_next();
         callback_->test_completed(tr);
 
-	if( tr.result == test_result::ex_ctor )
-	{
+        if( tr.result == test_result::ex_ctor )
+        {
           throw no_more_tests();
         }
       }
@@ -835,9 +835,9 @@ namespace tut
       {
 #endif
         if( obj.get() == 0 ) 
-	{
+        {
           reset_holder_(obj);
-	}
+        }
         obj->called_method_was_a_dummy_test_ = false;
 
 #if defined(TUT_USE_SEH)

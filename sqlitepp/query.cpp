@@ -24,17 +24,17 @@ query::query() = default;
 
 query::query(query&& src) noexcept
 {
-	swap(src);
+    swap(src);
 }
 
 query& query::operator=(query&& src) noexcept
 {
-	if ( this != &src )
-	{
-		query().swap(*this);
-		swap(src);
-	}
-	return *this;
+    if ( this != &src )
+    {
+        query().swap(*this);
+        swap(src);
+    }
+    return *this;
 }
 
 query::~query() = default;
@@ -54,8 +54,8 @@ std::string query::sql() const
 
 void query::clear() noexcept
 {
-	intos_.clear();
-	uses_.clear();
+    intos_.clear();
+    uses_.clear();
     sql_.str(std::string());
     sql_.clear();
 }
@@ -63,12 +63,12 @@ void query::clear() noexcept
 
 query& query::put(into_binder_ptr i)
 {
-	if ( !i )
-	{
-		throw std::invalid_argument("null into binder");
-	}
-	intos_.emplace_back(std::move(i));
-	return *this;
+    if ( !i )
+    {
+        throw std::invalid_argument("null into binder");
+    }
+    intos_.emplace_back(std::move(i));
+    return *this;
 }
 //----------------------------------------------------------------------------
 
@@ -80,12 +80,12 @@ query& query::operator,(into_binder_ptr i)
 
 query& query::put(use_binder_ptr u)
 {
-	if ( !u )
-	{
-		throw std::invalid_argument("null use binder");
-	}
-	uses_.emplace_back(std::move(u));
-	return *this;
+    if ( !u )
+    {
+        throw std::invalid_argument("null use binder");
+    }
+    uses_.emplace_back(std::move(u));
+    return *this;
 }
 //----------------------------------------------------------------------------
 
@@ -101,24 +101,24 @@ query& query::operator,(use_binder_ptr u)
 // prepare_query
 //
 prepare_query::prepare_query(statement& st) noexcept
-	: st_(&st)
+    : st_(&st)
 {
 }
 
 prepare_query::prepare_query(prepare_query&& src) noexcept
-	: query(static_cast<query&&>(src))
-	, st_(src.st_)
+    : query(static_cast<query&&>(src))
+    , st_(src.st_)
 {
-	src.st_ = nullptr;
+    src.st_ = nullptr;
 }
 
 prepare_query::~prepare_query()
 {
-	if ( st_ )
-	{
+    if ( st_ )
+    {
         st_->finalize(false);
         st_->q().swap(*this);
-	}
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -127,28 +127,28 @@ prepare_query::~prepare_query()
 //
 
 once_query::once_query(session& s) noexcept
-	: s_(&s)
+    : s_(&s)
 {
 }
 //----------------------------------------------------------------------------
 
 once_query::once_query(once_query&& src) noexcept
-	: query(static_cast<query&&>(src))
-	, s_(src.s_)
+    : query(static_cast<query&&>(src))
+    , s_(src.s_)
 {
-	src.s_ = nullptr;
+    src.s_ = nullptr;
 }
 //----------------------------------------------------------------------------
 
 once_query::~once_query() noexcept(false)
 {
-	if ( s_ )
-	{
-		// execute statement in session.
-		statement st(*s_);
-		st.q().swap(*this);
-		st.exec();
-	}
+    if ( s_ )
+    {
+        // execute statement in session.
+        statement st(*s_);
+        st.q().swap(*this);
+        st.exec();
+    }
 }
 //----------------------------------------------------------------------------
 

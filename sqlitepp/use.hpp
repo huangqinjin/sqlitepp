@@ -61,15 +61,15 @@ template<typename T>
 class use_name_binder : public use_pos_binder<T>
 {
 public:
-	use_name_binder(T&& value, text const& name, bool copy)
-		: use_pos_binder<T>(std::forward<T>(value), -1, copy)
-		, name_(name.to_string()) {}
+    use_name_binder(T&& value, text const& name, bool copy)
+        : use_pos_binder<T>(std::forward<T>(value), -1, copy)
+        , name_(name.to_string()) {}
 
-	int bind(statement& st, int) override
-	{
-	    if (this->pos_ < 0) this->pos_ = st.use_pos(this->name_);
-	    return use_pos_binder<T>::bind(st, this->pos_);
-	}
+    int bind(statement& st, int) override
+    {
+        if (this->pos_ < 0) this->pos_ = st.use_pos(this->name_);
+        return use_pos_binder<T>::bind(st, this->pos_);
+    }
 
 protected:
     u8string const name_;
@@ -79,7 +79,7 @@ protected:
 template<typename T>
 inline use_binder_ptr use(T&& t, bool copy = false)
 {
-	return use_binder_ptr(new use_nameless_binder<T>(std::forward<T>(t), copy));
+    return use_binder_ptr(new use_nameless_binder<T>(std::forward<T>(t), copy));
 }
 //----------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ inline use_binder_ptr use(T&& t, int pos, bool copy = false)
 template<typename T>
 inline use_binder_ptr use(T&& t, text const& name, bool copy = false)
 {
-	return use_binder_ptr(new use_name_binder<T>(std::forward<T>(t), name, copy));
+    return use_binder_ptr(new use_name_binder<T>(std::forward<T>(t), name, copy));
 }
 //----------------------------------------------------------------------------
 

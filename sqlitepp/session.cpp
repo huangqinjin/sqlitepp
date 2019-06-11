@@ -28,17 +28,17 @@ namespace sqlitepp {
 
 // Create an empty session.
 session::session() noexcept
-	: impl_(nullptr)
-	, active_txn_(nullptr)
-	, last_exec_(false)
+    : impl_(nullptr)
+    , active_txn_(nullptr)
+    , last_exec_(false)
 {
 }
 //----------------------------------------------------------------------------
 
 session::session(text const& filename, unsigned flags)
-	: session()
+    : session()
 {
-	open(filename, flags);
+    open(filename, flags);
 }
 //----------------------------------------------------------------------------
 
@@ -58,28 +58,28 @@ session::~session()
 
 void session::open(text const& filename, unsigned flags)
 {
-	// close previous session
-	close(true);
+    // close previous session
+    close(true);
 
-	if ( flags & write )
-	{
-		flags &= ~read;
-	}
+    if ( flags & write )
+    {
+        flags &= ~read;
+    }
 
-	flags |= SQLITE_OPEN_URI;
+    flags |= SQLITE_OPEN_URI;
 
-	int const r = sqlite3_open_v2(filename, &impl_, flags, nullptr);
-	if ( r != SQLITE_OK )
-	{
-	    struct closer
+    int const r = sqlite3_open_v2(filename, &impl_, flags, nullptr);
+    if ( r != SQLITE_OK )
+    {
+        struct closer
         {
-	        session* const self;
-	        ~closer() { self->close(true); }
+            session* const self;
+            ~closer() { self->close(true); }
         } _ {this}; // session should be closed anyway
         // If NULL is passed, we assume a malloc() failed during sqlite3_open().
         // @see sqlite3_errcode()
         throw exception(sqlite3_extended_errcode(impl_), sqlite3_errmsg(impl_));
-	}
+    }
 }
 //----------------------------------------------------------------------------
 
@@ -146,25 +146,25 @@ sqlite3* session::impl() const noexcept
 
 int session::last_error() const noexcept
 {
-	return impl_ ? sqlite3_extended_errcode(impl_) : SQLITE_OK;
+    return impl_ ? sqlite3_extended_errcode(impl_) : SQLITE_OK;
 }
 //----------------------------------------------------------------------------
 
 long long session::last_insert_rowid() const noexcept
 {
-	return impl_ ? sqlite3_last_insert_rowid(impl_) : 0;
+    return impl_ ? sqlite3_last_insert_rowid(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 
 std::size_t session::last_changes() const noexcept
 {
-	return impl_ ? sqlite3_changes(impl_) : 0;
+    return impl_ ? sqlite3_changes(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 
 std::size_t session::total_changes() const noexcept
 {
-	return impl_ ? sqlite3_total_changes(impl_) : 0;
+    return impl_ ? sqlite3_total_changes(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 

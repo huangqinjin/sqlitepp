@@ -20,26 +20,26 @@ namespace sqlitepp {
 class SQLITEPP_API transaction
 {
 public:
-	// Transaction type
-	enum type { deferred, immediate, exclusive };
+    // Transaction type
+    enum type { deferred, immediate, exclusive };
 
-	// Begin transaction in context of session.
-	explicit transaction(session& s, type t = deferred);
+    // Begin transaction in context of session.
+    explicit transaction(session& s, type t = deferred);
 
     transaction(transaction const&) = delete;
     transaction& operator=(transaction const&) = delete;
 
-	// End transaction with rollback if it is not committed.
-	~transaction();
+    // End transaction with rollback if it is not committed.
+    ~transaction();
 
-	// Rollback transaction
-	void rollback();
+    // Rollback transaction
+    void rollback();
 
-	// Commit transaction.
-	void commit();
+    // Commit transaction.
+    void commit();
 
 private:
-	session* s_;
+    session* s_;
 };
 
 //////////////////////////////////////////////////////////////////////////////

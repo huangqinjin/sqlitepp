@@ -22,8 +22,8 @@ namespace sqlitepp {
 // Database session. Noncopyable.
 class SQLITEPP_API session
 {
-	friend class transaction; // access to active_txn_
-	friend class statement;   // access to last_exec_
+    friend class transaction; // access to active_txn_
+    friend class statement;   // access to last_exec_
 
 public:
     enum : unsigned
@@ -33,57 +33,57 @@ public:
         create = 4,
     };
 
-	// Create a session.
-	session() noexcept;
-	
-	// Create and open session.
-	// Optional parameter flags for file open operations
-	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	explicit session(text const& filename, unsigned flags = read | write | create);
+    // Create a session.
+    session() noexcept;
+    
+    // Create and open session.
+    // Optional parameter flags for file open operations
+    // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+    explicit session(text const& filename, unsigned flags = read | write | create);
 
     // Create and open session.
     // Parameter encoding for newly created database file storage
     // Optional parameter flags for file open operations
     // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	explicit session(text const& filename, enum encoding encoding, unsigned flags = read | write | create);
+    explicit session(text const& filename, enum encoding encoding, unsigned flags = read | write | create);
 
     session(session const&) = delete;
     session& operator=(session const&) = delete;
 
-	// Close session on destroy.
-	~session();
+    // Close session on destroy.
+    ~session();
 
-	// Open database session. Previous one will be closed.
-	// Optional parameter flags for file open operations
-	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	void open(text const& filename, unsigned flags = read | write | create);
+    // Open database session. Previous one will be closed.
+    // Optional parameter flags for file open operations
+    // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+    void open(text const& filename, unsigned flags = read | write | create);
 
     // Open database session. Previous one will be closed.
     // Parameter encoding for newly created database file storage
     // Optional parameter flags for file open operations
     // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
-	void open(text const& filename, enum encoding encoding, unsigned flags = read | write | create);
+    void open(text const& filename, enum encoding encoding, unsigned flags = read | write | create);
 
     // Current encoding.
     enum encoding encoding() const noexcept;
 
-	// Close database session.
-	void close(bool force = false);
+    // Close database session.
+    void close(bool force = false);
 
-	// Is session opened?
-	bool is_open() const noexcept;
+    // Is session opened?
+    bool is_open() const noexcept;
 
-	// Is there an active transaction?
-	// Currently SQLite 3 doesn't support nested transactions.
-	// So we can test, is there any transaction in session.
-	// If we have the transaction, we get it or null otherwise.
-	transaction* active_txn() const noexcept;
+    // Is there an active transaction?
+    // Currently SQLite 3 doesn't support nested transactions.
+    // So we can test, is there any transaction in session.
+    // If we have the transaction, we get it or null otherwise.
+    transaction* active_txn() const noexcept;
 
     // Last statement::exec result
     bool last_exec() const noexcept;
 
-	/// SQLite implementation for native sqlite3 functions.
-	sqlite3* impl() const noexcept;
+    /// SQLite implementation for native sqlite3 functions.
+    sqlite3* impl() const noexcept;
 
     /// Check the most recent sqlite3_* API call's error code. If code is not ok, throws exception.
     void check_error(int code) const;
@@ -91,35 +91,35 @@ public:
     /// If last error is not ok, throws exception, equivalent to check_error(last_error).
     void check_last_error() const;
 
-	// Last session error
-	int last_error() const noexcept;
+    // Last session error
+    int last_error() const noexcept;
 
-	// Last insert row ID
-	long long last_insert_rowid() const noexcept;
-	
-	// The number of rows that were changed (or inserted or deleted)
-	// by the most recent SQL statement
-	std::size_t last_changes() const noexcept;
+    // Last insert row ID
+    long long last_insert_rowid() const noexcept;
+    
+    // The number of rows that were changed (or inserted or deleted)
+    // by the most recent SQL statement
+    std::size_t last_changes() const noexcept;
 
-	// The number of rows that were changed (or inserted or deleted)
-	// since the database was opened
+    // The number of rows that were changed (or inserted or deleted)
+    // since the database was opened
     std::size_t total_changes() const noexcept;
 
-	// Execute SQL query immediately.
-	// It might be useful for resultless statements like INSERT, UPDATE etc.
-	// T is any output-stream-shiftable type.
-	template<typename T>
-	once_query operator<<(T const& t)
-	{
-		once_query q(*this);
-		q << t;
-		return q;
-	}
+    // Execute SQL query immediately.
+    // It might be useful for resultless statements like INSERT, UPDATE etc.
+    // T is any output-stream-shiftable type.
+    template<typename T>
+    once_query operator<<(T const& t)
+    {
+        once_query q(*this);
+        q << t;
+        return q;
+    }
 
 private:
-	sqlite3* impl_;
-	transaction* active_txn_;
-	bool last_exec_;
+    sqlite3* impl_;
+    transaction* active_txn_;
+    bool last_exec_;
 };
 
 //////////////////////////////////////////////////////////////////////////////

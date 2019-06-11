@@ -20,8 +20,8 @@ namespace sqlitepp {
 
 struct SQLITEPP_API blob
 {
-	void const* data;
-	std::size_t size;
+    void const* data;
+    std::size_t size;
 };
 
 template<typename CharT>

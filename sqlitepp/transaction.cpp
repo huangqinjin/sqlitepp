@@ -18,68 +18,68 @@ namespace sqlitepp {
 //////////////////////////////////////////////////////////////////////////////
 
 transaction::transaction(session& s, type t)
-	: s_(&s)
+    : s_(&s)
 {
-	if ( s_->active_txn() )
-	{
-		throw nested_txn_not_supported();
-	}
+    if ( s_->active_txn() )
+    {
+        throw nested_txn_not_supported();
+    }
 
-	char const* begin_cmd;
-	switch ( t )
-	{
-	case deferred:
-		begin_cmd = "begin deferred";
-		break;
-	case immediate:
-		begin_cmd = "begin immediate";
-		break;
-	case exclusive:
-		begin_cmd = "begin exclusive";
-		break;
-	default:
-		assert(!"unknown transaction type");
-		begin_cmd = "begin";
-		break;
-	}
+    char const* begin_cmd;
+    switch ( t )
+    {
+    case deferred:
+        begin_cmd = "begin deferred";
+        break;
+    case immediate:
+        begin_cmd = "begin immediate";
+        break;
+    case exclusive:
+        begin_cmd = "begin exclusive";
+        break;
+    default:
+        assert(!"unknown transaction type");
+        begin_cmd = "begin";
+        break;
+    }
 
-	*s_ << begin_cmd;
-	s_->active_txn_ = this;
+    *s_ << begin_cmd;
+    s_->active_txn_ = this;
 }
 //----------------------------------------------------------------------------
 
 transaction::~transaction()
 {
-	try
-	{
-		rollback();
-	}
-	catch (...)
-	{
-		assert(false);
-	}
+    try
+    {
+        rollback();
+    }
+    catch (...)
+    {
+        assert(false);
+    }
 }
 //----------------------------------------------------------------------------
 
 void transaction::rollback()
 {
-	if ( s_ )
-	{
-		*s_ << "rollback";
+    if ( s_ )
+    {
+        *s_ << "rollback";
         s_->active_txn_ = nullptr;
         s_ = nullptr;
-	}
+    }
 }
 //----------------------------------------------------------------------------
 
 void transaction::commit()
 {
-	if ( s_ )
-	{
-		*s_ << "commit";
+    if ( s_ )
+    {
+        *s_ << "commit";
         s_->active_txn_ = nullptr;
-		s_ = nullptr;
-	}
+        s_ = nullptr;
+    }
 }
 //----------------------------------------------------------------------------
 

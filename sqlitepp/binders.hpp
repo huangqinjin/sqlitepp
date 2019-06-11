@@ -22,15 +22,15 @@ namespace sqlitepp {
 class SQLITEPP_API into_binder
 {
 public:
-	into_binder() = default;
-	virtual ~into_binder() = default;
+    into_binder() = default;
+    virtual ~into_binder() = default;
     into_binder(into_binder const&) = delete;
     into_binder& operator=(into_binder const&) = delete;
 
-	// Bind value to statement st in position pos.
-	virtual int bind(statement& st, int pos) = 0;
+    // Bind value to statement st in position pos.
+    virtual int bind(statement& st, int pos) = 0;
 
-	// Update bound value.
+    // Update bound value.
     virtual void update(statement& st) = 0;
 };
 
@@ -45,7 +45,7 @@ public:
     use_binder(use_binder const&) = delete;
     use_binder& operator=(use_binder const&) = delete;
 
-	/// Bind value to statement st in position pos
+    /// Bind value to statement st in position pos
     virtual int bind(statement& st, int pos) = 0;
 };
 

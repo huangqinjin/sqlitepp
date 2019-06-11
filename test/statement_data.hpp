@@ -34,29 +34,29 @@ using sqlitepp::string_t;
 
 struct statement_data : session_data
 {
-	sqlitepp::statement st;
+    sqlitepp::statement st;
 
-	statement_data();
-	~statement_data();
+    statement_data();
+    ~statement_data();
 
-	struct record
-	{
-		int id;
-		string_t name;
-		double salary;
-		
-		typedef std::vector<char> blob_data;
-		blob_data data;
+    struct record
+    {
+        int id;
+        string_t name;
+        double salary;
+        
+        typedef std::vector<char> blob_data;
+        blob_data data;
 
-		record() {}
+        record() {}
 
-		record(int id, string_t const& name, double salary)
-			: id(id), name(name), salary(salary)
-		{
-		}
+        record(int id, string_t const& name, double salary)
+            : id(id), name(name), salary(salary)
+        {
+        }
 
-		void insert(sqlitepp::session& se);
-	};
+        void insert(sqlitepp::session& se);
+    };
 };
 
 namespace tut {

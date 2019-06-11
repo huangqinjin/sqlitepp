@@ -24,16 +24,16 @@ template<typename T>
 class into_pos_binder : public into_binder
 {
 public:
-	explicit into_pos_binder(T& value, int pos)
-		: pos_(pos)
-		, value_(value)
-	{
-	}
+    explicit into_pos_binder(T& value, int pos)
+        : pos_(pos)
+        , value_(value)
+    {
+    }
 
     int bind(statement&, int pos) override
     {
-	    if (this->pos_ < 0) this->pos_ = pos;
-	    return this->pos_;
+        if (this->pos_ < 0) this->pos_ = pos;
+        return this->pos_;
     }
 
     void update(statement& st) override
@@ -44,8 +44,8 @@ public:
     }
 
 protected:
-	int pos_;
-	T& value_;
+    int pos_;
+    T& value_;
 };
 
 /// Named into binder.
@@ -53,28 +53,28 @@ template<typename T>
 class into_name_binder : public into_pos_binder<T>
 {
 public:
-	into_name_binder(T& value, text const& name)
-		: into_pos_binder<T>(value, -1)
-		, name_(name.to_string()) {}
+    into_name_binder(T& value, text const& name)
+        : into_pos_binder<T>(value, -1)
+        , name_(name.to_string()) {}
 
-	int bind(statement& st, int) override
-	{
-		if ( this->pos_ < 0 )
-		{
-			this->pos_ = st.column_index(this->name_);
-		}
+    int bind(statement& st, int) override
+    {
+        if ( this->pos_ < 0 )
+        {
+            this->pos_ = st.column_index(this->name_);
+        }
         return this->pos_;
-	}
+    }
 
 protected:
-	u8string const name_;
+    u8string const name_;
 };
 
 // Create position into binding for reference t.
 template<typename T>
 inline into_binder_ptr into(T& t, int pos = -1)
 {
-	return into_binder_ptr(new into_pos_binder<T>(t, pos));
+    return into_binder_ptr(new into_pos_binder<T>(t, pos));
 }
 //----------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@ inline into_binder_ptr into(T& t, int pos = -1)
 template<typename T>
 inline into_binder_ptr into(T& t, text const& name)
 {
-	return into_binder_ptr(new into_name_binder<T>(t, name));
+    return into_binder_ptr(new into_name_binder<T>(t, name));
 }
 //----------------------------------------------------------------------------
 
