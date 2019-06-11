@@ -1,7 +1,0 @@
-import testing ;
-
-unit-test test
-    : [ glob *.cpp ] ..//sqlite ..//sqlitepp 
-	: <include>tut <include>.. <define>SQLITEPP_TEST
-	  <target-os>linux,<toolset>gcc:<linkflags>"-ldl -lpthread"
-;

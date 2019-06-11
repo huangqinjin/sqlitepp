@@ -1,4 +1,0 @@
-lib sqlitepp : [ glob *.cpp ] ../sqlite//sqlite : <version>0.5.5 ;
-
-install ../lib : sqlitepp ;
-install ../include/sqlitepp : [ glob *.hpp ] ;

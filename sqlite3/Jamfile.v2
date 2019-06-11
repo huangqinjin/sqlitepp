@@ -1,7 +1,0 @@
-lib sqlite : sqlite3.c
-    : <version>3.18.0 <include>.
-      <threading>single : <define>SQLITE_THREADSAFE=0
-;
-
-install ../lib : sqlite ;
-install ../include : sqlite3.h ;
