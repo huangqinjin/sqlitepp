@@ -21,6 +21,9 @@ set(SQLITE_DEFAULT_WAL_SYNCHRONOUS "1" CACHE STRING
 )
 set_property(CACHE SQLITE_DEFAULT_WAL_SYNCHRONOUS PROPERTY STRINGS 0 1 2 3)
 
+set(SQLITE_DQS "0" CACHE STRING "Determines whether or not Double-Quoted Strings are allowed by default in DDL and DML.")
+set_property(CACHE SQLITE_DQS PROPERTY STRINGS 0 1 2 3)
+
 set(SQLITE_DEFAULT_MEMSTATUS "0" CACHE STRING "Determines whether or not sqlite3_status() interfaces that track memory usage to be enabled.")
 set_property(CACHE SQLITE_DEFAULT_MEMSTATUS PROPERTY STRINGS 0 1)
 
