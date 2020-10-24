@@ -68,6 +68,11 @@ void session::open(text const& filename, unsigned flags)
 
     flags |= SQLITE_OPEN_URI;
 
+    // The new database connection will use the "multi-thread" threading mode.
+    // This means that separate threads are allowed to use SQLite at the same time,
+    // as long as each thread is using a different database connection.
+    flags |= SQLITE_OPEN_NOMUTEX;
+
     int const r = sqlite3_open_v2(filename, &impl_, flags, nullptr);
     if ( r != SQLITE_OK )
     {
