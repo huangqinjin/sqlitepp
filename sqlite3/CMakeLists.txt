@@ -37,6 +37,7 @@ option(SQLITE_ENABLE_JSON1 "Determines whether or not the JSON SQL functions to 
 option(SQLITE_ENABLE_RTREE "Determines whether or not to include support for the R*Tree index extension." ON)
 option(SQLITE_ENABLE_FTS4 "Determines whether or not versions 3 and 4 of the full-text search engine to be added to the build." OFF)
 option(SQLITE_ENABLE_FTS5 "Determines whether or not versions 5 of the full-text search engine (fts5) to be added to the build." ON)
+option(SQLITE_ENABLE_MATH_FUNCTIONS "Enables built-in SQL math functions." ON)
 
 list(APPEND SQLITE_OPTIONS SQLITE_LIKE_DOESNT_MATCH_BLOBS SQLITE_OMIT_AUTORESET)
 get_directory_property(ALL_OPTIONS CACHE_VARIABLES)
