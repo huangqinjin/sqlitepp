@@ -56,7 +56,7 @@ void statement::prepare()
         char const* tail = nullptr;
         std::string const sql = q_.sql();
         s_.check_error(sqlite3_prepare_v2(s_.impl(), sql.c_str(),
-                sql.size() + 1, // nByte is the number of bytes in the input string including the nul-terminator.
+                (int)sql.size() + 1, // nByte is the number of bytes in the input string including the nul-terminator.
                 &impl_, &tail));
         if ( tail && *tail )
         {

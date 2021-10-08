@@ -93,10 +93,10 @@ void session::open(text const& filename, enum encoding encoding, unsigned flags)
     open(filename, flags);
     switch (encoding)
     {
-    case encoding::utf_8: SQLITEPP_EXEC(pragma encoding = "UTF-8",); break;
-    case encoding::utf_16le: SQLITEPP_EXEC(pragma encoding = "UTF-16LE",); break;
-    case encoding::utf_16be: SQLITEPP_EXEC(pragma encoding = "UTF-16BE",); break;
-    case encoding::utf_16: SQLITEPP_EXEC(pragma encoding = "UTF-16",); break;
+    case encoding::utf_8: SQLITEPP_EXEC(pragma encoding = "UTF-8", (void)0); break;
+    case encoding::utf_16le: SQLITEPP_EXEC(pragma encoding = "UTF-16LE", (void)0); break;
+    case encoding::utf_16be: SQLITEPP_EXEC(pragma encoding = "UTF-16BE", (void)0); break;
+    case encoding::utf_16: SQLITEPP_EXEC(pragma encoding = "UTF-16", (void)0); break;
     default: break;
     }
 }
