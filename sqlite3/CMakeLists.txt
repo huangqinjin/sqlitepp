@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(sqlite3 VERSION 3.36.0)
+project(sqlite3 VERSION 3.37.0)
 
 option(BUILD_SHELL "build sqlite3 shell" OFF)
 
@@ -82,6 +82,7 @@ if(BUILD_SHARED_LIBS OR LIBRARY_TYPE STREQUAL "SHARED")
         target_compile_definitions(${PROJECT_NAME} INTERFACE "SQLITE_API=__declspec(dllimport)")
     else()
         list(APPEND SQLITE_OPTIONS "SQLITE_API=__attribute__((visibility(\"default\")))")
+        target_compile_definitions(${PROJECT_NAME} INTERFACE "SQLITE_API=__attribute__((visibility(\"default\")))")
     endif()
 endif()
 
