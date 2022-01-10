@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(sqlitepp VERSION 1.9.1)
+project(sqlitepp VERSION 1.9.2)
 set(PACKAGE_NAME ${PROJECT_NAME})
 
 set(BUILD_SQLITE3 OFF CACHE STRING "build sqlite3 shipped with sqlitepp")
