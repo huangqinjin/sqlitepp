@@ -33,7 +33,6 @@ option(SQLITE_OMIT_DEPRECATED "Omitting deprecated interfaces and features will 
 option(SQLITE_OMIT_PROGRESS_CALLBACK "The progress handler callback counter must be checked in the inner loop of the bytecode engine. By omitting this interface, a single conditional is removed from the inner loop of the bytecode engine." ON)
 option(SQLITE_OMIT_SHARED_CACHE "Omitting the possibility of using shared cache allows many conditionals in performance-critical sections of the code to be eliminated." ON)
 option(SQLITE_USE_ALLOCA "Make use of alloca() for dynamically allocating temporary stack space for use within a single function." ON)
-option(SQLITE_ENABLE_JSON1 "Determines whether or not the JSON SQL functions to be added to the build." ON)
 option(SQLITE_ENABLE_RTREE "Determines whether or not to include support for the R*Tree index extension." ON)
 option(SQLITE_ENABLE_FTS4 "Determines whether or not versions 3 and 4 of the full-text search engine to be added to the build." OFF)
 option(SQLITE_ENABLE_FTS5 "Determines whether or not versions 5 of the full-text search engine (fts5) to be added to the build." ON)
