@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.14)
 
 file(GLOB HEADER_FILES *.hpp)
 file(GLOB SOURCE_FILES *.cpp)
@@ -48,8 +48,10 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}-config.cmake.in"
 include(\"\${CMAKE_CURRENT_LIST_DIR}/@PACKAGE_NAME@-targets.cmake\")
 if(NOT TARGET sqlitepp::sqlite3)
     include(CMakeFindDependencyMacro)
-    list(APPEND CMAKE_MODULE_PATH \${CMAKE_CURRENT_LIST_DIR})
     find_dependency(SQLite3)
+    if(TARGET SQLite::SQLite3)
+        add_library(sqlitepp::sqlite3 ALIAS SQLite::SQLite3)
+    endif()
 endif()
 check_required_components(@PACKAGE_NAME@)
 ")
@@ -65,5 +67,4 @@ write_basic_package_version_file(
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}-config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}-config-version.cmake"
-    "${CMAKE_CURRENT_LIST_DIR}/FindSQLite3.cmake"
     DESTINATION ${ConfigPackageLocation})
