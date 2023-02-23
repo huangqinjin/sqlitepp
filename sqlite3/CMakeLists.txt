@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(sqlite3 VERSION 3.40.1)
+project(sqlite3 VERSION 3.41.0)
 
 option(BUILD_SHELL "build sqlite3 shell" OFF)
 
