@@ -61,7 +61,7 @@ configure_package_config_file("${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}-confi
     INSTALL_DESTINATION ${ConfigPackageLocation})
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}-config-version.cmake"
+    "${PACKAGE_NAME}-config-version.cmake"
     COMPATIBILITY SameMinorVersion)
 
 install(FILES
